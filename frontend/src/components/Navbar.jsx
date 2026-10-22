@@ -16,9 +16,8 @@ export default function Navbar() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const navItems = [
-    { to: '/', label: 'Resumen' },
-    { to: '/productos', label: 'Catálogo' },
-    { to: '/productos?nuevo=1', label: 'Editor de Juguete' },
+    { to: '/', label: 'Dashboard' },
+    { to: '/productos', label: 'Catálogo & Editor' },
     { to: '/nueva-orden', label: 'Carrito Mágico' },
     { to: '/ordenes', label: 'Órdenes' },
   ];

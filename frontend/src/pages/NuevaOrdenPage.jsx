@@ -9,6 +9,7 @@ import {
   createCliente,
   recomendarCarritoIA 
 } from '../services/api.js';
+import { getToyImageUrl, DEFAULT_TOY_IMAGE } from '../utils/toyImages.js';
 import AlertBox from '../components/AlertBox.jsx';
 import Modal from '../components/Modal.jsx';
 import LoadingState from '../components/LoadingState.jsx';
@@ -380,19 +381,29 @@ export default function NuevaOrdenPage() {
                       backgroundColor: 'var(--bg-subtle)',
                       borderRadius: 'var(--radius-sm)',
                       border: '1px solid var(--border-color)',
+                      gap: 12,
                       opacity: agotado ? 0.6 : 1
                     }}
                   >
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{p.nombre}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        ${p.precio.toFixed(2)} · Stock: <strong style={{ color: p.stock > 5 ? 'var(--success)' : 'var(--warning)' }}>{p.stock}</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+                      <img 
+                        src={getToyImageUrl(p)} 
+                        alt={p.nombre} 
+                        style={{ width: 44, height: 44, borderRadius: 8, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border-color)' }}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_TOY_IMAGE; }}
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nombre}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          ${p.precio.toFixed(2)} · Stock: <strong style={{ color: p.stock > 5 ? 'var(--pastel-mint-text)' : 'var(--pastel-butter-text)' }}>{p.stock}</strong>
+                        </div>
                       </div>
                     </div>
                     <button
                       onClick={() => handleAgregarProducto(p)}
                       disabled={agotado || (enCarrito && enCarrito.cantidad >= p.stock)}
                       className="btn btn-secondary btn-sm"
+                      style={{ flexShrink: 0 }}
                     >
                       <Plus size={14} /> {enCarrito ? `Añadir (${enCarrito.cantidad})` : 'Agregar'}
                     </button>
@@ -425,11 +436,18 @@ export default function NuevaOrdenPage() {
                       justifyContent: 'space-between',
                       padding: '10px 12px',
                       backgroundColor: 'var(--bg-subtle)',
-                      borderRadius: 'var(--radius-sm)'
+                      borderRadius: 'var(--radius-sm)',
+                      gap: 10
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.producto.nombre}</div>
+                    <img 
+                      src={getToyImageUrl(item.producto)} 
+                      alt={item.producto.nombre} 
+                      style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border-color)' }}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_TOY_IMAGE; }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.86rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.producto.nombre}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                         ${item.producto.precio.toFixed(2)} x {item.cantidad} = ${(item.producto.precio * item.cantidad).toFixed(2)}
                       </div>
