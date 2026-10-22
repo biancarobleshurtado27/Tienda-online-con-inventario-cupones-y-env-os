@@ -16,16 +16,16 @@ export default function Navbar() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const navItems = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/productos', label: 'Catálogo & Editor' },
-    { to: '/nueva-orden', label: 'Carrito Mágico' },
-    { to: '/ordenes', label: 'Órdenes' },
+    { to: '/admin', label: 'Dashboard', end: true },
+    { to: '/admin/productos', label: 'Catálogo & Editor' },
+    { to: '/admin/nueva-orden', label: 'Crear Orden' },
+    { to: '/admin/ordenes', label: 'Gestión de Órdenes' },
   ];
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/productos?search=${encodeURIComponent(searchTerm.trim())}`);
+      navigate(`/admin/productos?search=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
 
@@ -49,7 +49,7 @@ export default function Navbar() {
       }}>
         {/* Brand */}
         <NavLink 
-          to="/" 
+          to="/admin" 
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -151,7 +151,7 @@ export default function Navbar() {
 
           {/* AI Copilot Button */}
           <NavLink
-            to="/asistente-ia"
+            to="/admin/asistente-ia"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -173,8 +173,8 @@ export default function Navbar() {
 
           {/* Cart Icon button */}
           <NavLink
-            to="/nueva-orden"
-            title="Carrito de Compras"
+            to="/admin/nueva-orden"
+            title="Crear Nueva Orden Interna"
             style={{
               width: 36,
               height: 36,
