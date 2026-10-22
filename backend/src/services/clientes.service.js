@@ -1,4 +1,5 @@
 import db from '../db.js';
+import { isValidId, isNonEmptyString } from '../utils/validators.js';
 
 export const clientesService = {
   getAll() {
@@ -6,12 +7,27 @@ export const clientesService = {
   },
 
   getById(id) {
-    return db.prepare('SELECT * FROM clientes WHERE id = ?').get(id);
+    if (!isValidId(id)) {
+      return null;
+    }
+    return db.prepare('SELECT * FROM clientes WHERE id = ?').get(Number(id));
   },
 
   create({ nombre, email, ciudad }) {
-    if (!nombre || !email || !ciudad) {
-      const err = new Error('Nombre, email y ciudad son obligatorios');
+    if (!isNonEmptyString(nombre)) {
+      const err = new Error('El nombre del cliente es obligatorio y debe ser una cadena de texto');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (!isNonEmptyString(email) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      const err = new Error('El correo electrónico es inválido');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (!isNonEmptyString(ciudad)) {
+      const err = new Error('La ciudad es obligatoria y debe ser una cadena de texto');
       err.statusCode = 400;
       throw err;
     }
@@ -45,7 +61,8 @@ export const clientesService = {
       'Limón': 12.00
     };
 
-    if (!ciudad) return 10.00;
-    return tarifas[ciudad.trim()] !== undefined ? tarifas[ciudad.trim()] : 10.00;
+    if (!ciudad || typeof ciudad !== 'string') return 10.00;
+    const cleanCiudad = ciudad.trim();
+    return tarifas[cleanCiudad] !== undefined ? tarifas[cleanCiudad] : 10.00;
   }
 };

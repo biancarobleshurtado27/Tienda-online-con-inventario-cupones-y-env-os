@@ -1,4 +1,5 @@
 import db from '../db.js';
+import { isNonEmptyString, isValidId } from '../utils/validators.js';
 
 export const iaService = {
   /**
@@ -6,11 +7,14 @@ export const iaService = {
    * para un producto dado su nombre y categoría.
    */
   async generarDescripcion(nombre, categoria) {
-    if (!nombre || !categoria) {
-      const err = new Error('Nombre y categoría son requeridos para la IA');
+    if (!isNonEmptyString(nombre) || !isNonEmptyString(categoria)) {
+      const err = new Error('Nombre y categoría son requeridos y deben ser cadenas de texto no vacías');
       err.statusCode = 400;
       throw err;
     }
+
+    const cleanNombre = nombre.trim();
+    const cleanCategoria = categoria.trim();
 
     const n8nUrl = process.env.N8N_WEBHOOK_URL;
     if (n8nUrl) {
@@ -23,8 +27,8 @@ export const iaService = {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'generar_descripcion',
-            nombre,
-            categoria
+            nombre: cleanNombre,
+            categoria: cleanCategoria
           }),
           signal: controller.signal
         });
@@ -43,19 +47,19 @@ export const iaService = {
 
     // Generador inteligente de fallback con el mismo contrato { ok, data, error }
     const templates = {
-      'Periféricos': `Potencia tu productividad y estación de juego con el nuevo ${nombre}. Diseñado con materiales premium para máxima durabilidad, respuesta inmediata y confort ergonómico en jornadas intensas.`,
-      'Audio': `Experimenta una inmersión acústica inigualable con ${nombre}. Calidad de sonido de alta fidelidad, graves profundos y nitidez cristalina para música, llamadas y streaming.`,
-      'Monitores': `Lleva tu experiencia visual al siguiente nivel con ${nombre}. Excelente reproducción de color, fluidez visual y ángulos de visión amplios que cuidan tu vista.`,
-      'Accesorios': `Optimiza tu espacio de trabajo y rendimiento diario con ${nombre}. Estructura confiable, diseño minimalista y máxima versatilidad.`
+      'Periféricos': `Potencia tu productividad y estación de juego con el nuevo ${cleanNombre}. Diseñado con materiales premium para máxima durabilidad, respuesta inmediata y confort ergonómico en jornadas intensas.`,
+      'Audio': `Experimenta una inmersión acústica inigualable con ${cleanNombre}. Calidad de sonido de alta fidelidad, graves profundos y nitidez cristalina para música, llamadas y streaming.`,
+      'Monitores': `Lleva tu experiencia visual al siguiente nivel con ${cleanNombre}. Excelente reproducción de color, fluidez visual y ángulos de visión amplios que cuidan tu vista.`,
+      'Accesorios': `Optimiza tu espacio de trabajo y rendimiento diario con ${cleanNombre}. Estructura confiable, diseño minimalista y máxima versatilidad.`
     };
 
-    const descripcion = templates[categoria] || `Descubre el nuevo ${nombre}, diseñado especialmente para la categoría ${categoria} con el balance perfecto entre rendimiento, diseño y durabilidad.`;
+    const descripcion = templates[cleanCategoria] || `Descubre el nuevo ${cleanNombre}, diseñado especialmente para la categoría ${cleanCategoria} con el balance perfecto entre rendimiento, diseño y durabilidad.`;
 
     return {
       ok: true,
       data: {
-        nombre,
-        categoria,
+        nombre: cleanNombre,
+        categoria: cleanCategoria,
         descripcion_generada: descripcion,
         fuente: 'Asistente IA (Tienda Copilot)'
       },
@@ -68,7 +72,7 @@ export const iaService = {
    */
   async recomendarProductos(carritoProductoIds = []) {
     const ids = Array.isArray(carritoProductoIds) 
-      ? carritoProductoIds.map(Number).filter(n => !isNaN(n))
+      ? carritoProductoIds.filter(isValidId).map(Number)
       : [];
 
     // Obtener categorías presentes en el carrito

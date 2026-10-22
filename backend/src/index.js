@@ -62,10 +62,20 @@ app.use((req, res) => {
 
 // Manejador global de errores
 app.use((err, req, res, next) => {
-  console.error('[SERVER ERROR]', err);
-  const status = err.statusCode || 500;
+  let status = err.statusCode || err.status || 500;
+  let message = err.message || 'Error interno del servidor';
+
+  // Si Express falló parseando JSON malformado enviado por el cliente
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    status = 400;
+    message = 'JSON malformado en el cuerpo de la solicitud';
+  } else if (err.code && typeof err.code === 'string' && err.code.startsWith('SQLITE_CONSTRAINT')) {
+    status = 409;
+    message = `Violación de restricción de integridad de base de datos: ${err.message}`;
+  }
+
   res.status(status).json({
-    error: err.message || 'Error interno del servidor'
+    error: message
   });
 });
 

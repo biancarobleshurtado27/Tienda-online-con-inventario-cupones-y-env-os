@@ -1,4 +1,5 @@
 import { clientesService } from '../services/clientes.service.js';
+import { isValidId } from '../utils/validators.js';
 
 export const clientesController = {
   getAll(req, res) {
@@ -13,6 +14,9 @@ export const clientesController = {
   getById(req, res) {
     try {
       const { id } = req.params;
+      if (!isValidId(id)) {
+        return res.status(400).json({ error: 'El ID del cliente debe ser un entero positivo' });
+      }
       const cliente = clientesService.getById(id);
       if (!cliente) {
         return res.status(404).json({ error: `Cliente con ID ${id} no encontrado` });
@@ -25,8 +29,9 @@ export const clientesController = {
 
   create(req, res) {
     try {
-      const nuevo = clientesService.create(req.body);
-      res.status(201).json(nuevo);
+      const nuevo = clientesService.create(req.body || {});
+      // Se retorna el objeto completo y alias cliente para compatibilidad con el frontend
+      res.status(201).json({ ...nuevo, cliente: nuevo });
     } catch (error) {
       res.status(error.statusCode || 500).json({ error: error.message });
     }
