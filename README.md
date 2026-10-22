@@ -1,19 +1,19 @@
-# Laboratorio #2 - Caso 5: Tienda Online con Inventario, Cupones y Envíos
+# Laboratorio #2 - Caso 5: Juguetería Online "Mundo Juguete"
 
 > **Materia:** Programación Web & BackEnd  
 > **Estudiante:** Daniel Ortiz Rivera  
-> **Caso de Estudio:** Caso 5 - Tienda Online con control de inventario en transacciones ACID, validación estricta de cupones, cálculo de tarifas de envío, métricas de agregación SQL e integración con Agente de IA en n8n.
+> **Caso de Estudio:** Caso 5 - Juguetería Online "Mundo Juguete" con control de inventario infantil en transacciones ACID, validación estricta de cupones, cálculo dinámico de tarifas de envío, métricas de agregación SQL e integración con Agente de IA en n8n.
 
 ---
 
 ## 📋 Resumen del Proyecto
 
-Este repositorio contiene la solución de extremo a extremo para el **Laboratorio 2 (Caso 5)**, estructurada en una arquitectura profesional desacoplada:
+Este repositorio contiene la solución de extremo a extremo para el **Laboratorio 2 (Caso 5)** adaptada al dominio de la juguetería **"Mundo Juguete"**, estructurada en una arquitectura desacoplada y robusta:
 
-1. **Base de Datos Relacional (`schema.sql`):** Esquema SQLite con llaves foráneas (`PRAGMA foreign_keys = ON`), restricciones de integridad `CHECK`, transacciones ACID e inserción de datos iniciales (*seed data*).
+1. **Base de Datos Relacional (`schema.sql`):** Esquema SQLite con llaves foráneas (`PRAGMA foreign_keys = ON`), restricciones de integridad `CHECK`, transacciones ACID e inserción de datos iniciales (*seed data* de juguetes, clientes y órdenes representativas).
 2. **Backend API REST (`/backend`):** Servidor Node.js con Express organizado por capas (`routes/`, `controllers/`, `services/`, `db.js`), validaciones con códigos de estado HTTP apropiados (200, 201, 400, 404, 409) y soporte de transacciones atómicas con `better-sqlite3`.
 3. **Frontend React SPA (`/frontend`):** Aplicación cliente construida con Vite, React 19, React Router (mínimo 4 vistas con navegación activa), servicio centralizado de peticiones (`services/api.js`), Custom Hook `useFetch` con manejo unificado de estados (`data`, `loading`, `error`, `refetch`), formularios controlados y filtros combinados con búsqueda y ordenamiento en tiempo real.
-4. **Automatización & Agente IA (`n8n_workflow.json`):** Flujo de trabajo exportado para n8n con Webhook entrante, router condicional (*Switch*), Agente LangChain para generación de descripciones comerciales persuasivas, motor de recomendaciones de carrito y contrato estandarizado `{ ok, data, error }`.
+4. **Automatización & Agente IA (`n8n_workflow.json`):** Flujo de trabajo exportado para n8n sin credenciales externas con Webhook entrante, router condicional (*Switch*), generación de descripciones didácticas y comerciales de juguetes, motor de recomendaciones personalizadas para el carrito y contrato estandarizado `{ ok, data, error }`.
 5. **Colección de Pruebas:** Archivo de Thunder Client (`thunder-collection_laboratorio2.json`) y suite automatizada de pruebas HTTP (`backend/tests/test_endpoints.js`).
 
 ---
@@ -93,13 +93,68 @@ laboratorio2/
 
 ## 🗄️ Modelo de Base de Datos Relacional (`schema.sql`)
 
-El esquema de base de datos implementa las cinco entidades del Caso 5 con integridad referencial estricta:
+El esquema de base de datos implementa las cinco entidades de Mundo Juguete con integridad referencial estricta:
 
-1. **`productos`**: Catálogo con precio positivo (`CHECK (precio > 0)`), control de existencias (`CHECK (stock >= 0)`), categoría y bandera `activo`.
-2. **`clientes`**: Identificación de compradores, correo único (`email UNIQUE`) y ciudad para el cálculo tarifario de despacho.
-3. **`cupones`**: Reglas de descuento porcentual (`CHECK (porcentaje > 0 AND porcentaje <= 100)`), fecha de expiración (`vigente_hasta`) y límite de usos permitidos (`usos_maximos > 0`).
+```mermaid
+erDiagram
+    CLIENTES ||--o{ ORDENES : "realiza"
+    CUPONES ||--o{ ORDENES : "aplica en"
+    ORDENES ||--|{ ORDEN_ITEMS : "contiene"
+    PRODUCTOS ||--o{ ORDEN_ITEMS : "incluido en"
+
+    CLIENTES {
+        int id PK
+        string nombre
+        string email UK
+        string ciudad
+    }
+
+    PRODUCTOS {
+        int id PK
+        string nombre
+        string descripcion
+        decimal precio
+        int stock
+        string categoria
+        int activo
+    }
+
+    CUPONES {
+        int id PK
+        string codigo UK
+        decimal porcentaje
+        date vigente_hasta
+        int usos_maximos
+    }
+
+    ORDENES {
+        int id PK
+        int cliente_id FK
+        int cupon_id FK
+        string estado
+        datetime fecha
+        decimal subtotal
+        decimal descuento
+        decimal envio
+        decimal total
+    }
+
+    ORDEN_ITEMS {
+        int id PK
+        int orden_id FK
+        int producto_id FK
+        int cantidad
+        decimal precio_unitario
+    }
+```
+
+### Entidades y Restricciones de Integridad
+
+1. **`productos`**: Catálogo de juguetes en categorías infantiles (`Construcción`, `Muñecas y figuras`, `Juegos de mesa`, `Peluches`, `Arte y manualidades`, `Vehículos y Exterior`) con precio positivo (`CHECK (precio > 0)`), control de existencias (`CHECK (stock >= 0)`), categoría y bandera `activo`.
+2. **`clientes`**: Identificación de compradores, correo electrónico único (`email UNIQUE`) y ciudad en Costa Rica para el cálculo dinámico del costo de despacho.
+3. **`cupones`**: Reglas de descuento porcentual (`CHECK (porcentaje > 0 AND porcentaje <= 100)`), fecha límite de vigencia (`vigente_hasta`) y cantidad máxima de canjes permitidos (`usos_maximos > 0`).
 4. **`ordenes`**: Encabezado del pedido con cliente, cupón opcional, estado restringido a `CHECK (estado IN ('nueva', 'pagada', 'enviada', 'entregada', 'cancelada'))`, fecha ISO, subtotal, descuento, costo de envío y total.
-5. **`orden_items`**: Detalle en cascada (`ON DELETE CASCADE`) con cantidad positiva (`CHECK (cantidad > 0)`) y precio unitario histórico capturado en el momento de la venta.
+5. **`orden_items`**: Detalle en cascada (`ON DELETE CASCADE`) con cantidad entera positiva (`CHECK (cantidad > 0)`) y precio unitario histórico capturado en el momento de la venta.
 
 ---
 
@@ -260,14 +315,14 @@ Y en caso de error o servicio no disponible:
 ### 🎯 Acciones Soportadas por el Webhook
 
 1. **`generar_descripcion`**:
-   - **Entrada:** `{ "action": "generar_descripcion", "nombre": "Teclado Mecánico RGB", "categoria": "Periféricos" }`
-   - **Salida:** Genera una descripción comercial persuasiva basada en la categoría y atributos del producto, devolviendo `{ ok: true, data: { descripcion_generada, ... }, error: null }`.
-   - **Integración en Frontend:** Accesible desde el formulario modal de creación y edición en la vista de **Catálogo de Productos** (`/productos`).
+   - **Entrada:** `{ "action": "generar_descripcion", "nombre": "Set Bloques Castillo Medieval", "categoria": "Construcción" }`
+   - **Salida:** Genera una descripción comercial y didáctica persuasiva para Mundo Juguete, devolviendo `{ ok: true, data: { descripcion_generada, ... }, error: null }`.
+   - **Integración en Frontend:** Accesible desde el formulario modal de creación y edición en la vista de **Catálogo de Juguetes** (`/productos`).
 
 2. **`recomendar`**:
    - **Entrada:** `{ "action": "recomendar", "carrito_ids": [1, 2], "productos_carrito": [...] }`
-   - **Salida:** Devuelve hasta 3 recomendaciones justificadas con nombre, precio y el motivo estratégico de la recomendación (`motivo`), devolviendo `{ ok: true, data: { recomendaciones: [...], ... }, error: null }`.
-   - **Integración en Frontend:** Accesible en vivo desde la vista de **Nueva Orden** (`/nueva-orden`) al presionar *"Recomendar complementos"* en el carrito.
+   - **Salida:** Devuelve hasta 3 recomendaciones justificadas con nombre del juguete, precio y el motivo didáctico de la sugerencia (`motivo`), devolviendo `{ ok: true, data: { recomendaciones: [...], ... }, error: null }`.
+   - **Integración en Frontend:** Accesible en vivo desde el carrito en **Nueva Orden** (`/nueva-orden`) al presionar *"Recomendar juguetes"*.
 
 ---
 
@@ -317,7 +372,7 @@ N8N_WEBHOOK_URL=http://localhost:5678/webhook/tienda-ai
 # 1. Probar acción generar_descripcion:
 curl -X POST http://localhost:5678/webhook/tienda-ai \
   -H "Content-Type: application/json" \
-  -d '{"action": "generar_descripcion", "nombre": "Monitor Gamer 165Hz", "categoria": "Monitores"}'
+  -d '{"action": "generar_descripcion", "nombre": "Castillo de Bloques 500 pcs", "categoria": "Construcción"}'
 
 # 2. Probar acción recomendar:
 curl -X POST http://localhost:5678/webhook/tienda-ai \
@@ -326,8 +381,8 @@ curl -X POST http://localhost:5678/webhook/tienda-ai \
 ```
 
 ##### B. Prueba en la Interfaz Web:
-- **Generación de descripción:** Ve a `/productos`, presiona *"Nuevo Producto"*, escribe un nombre y pulsa *"Generar con IA"*.
-- **Recomendaciones de carrito:** Ve a `/nueva-orden`, añade productos al carrito y pulsa *"Recomendar complementos"*.
+- **Generación de descripción:** Ve a `/productos`, presiona *"Nuevo Juguete"*, escribe un nombre y pulsa *"Generar con IA (n8n)"*.
+- **Recomendaciones de carrito:** Ve a `/nueva-orden`, añade juguetes al carrito y pulsa *"Recomendar juguetes"*.
 - **Transparencia y honestidad:** Si n8n no está encendido o `N8N_WEBHOOK_URL` no está definida, la interfaz no simula respuestas falsas; muestra claramente el mensaje de error indicando que n8n debe ser iniciado.
 
 #   T i e n d a - o n l i n e - c o n - i n v e n t a r i o - c u p o n e s - y - e n v - o s  

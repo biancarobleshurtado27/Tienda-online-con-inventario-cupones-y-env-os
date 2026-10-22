@@ -20,7 +20,7 @@ export default function Layout({ children }) {
       }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <span>
-            Laboratorio #2 · Tienda Online con Inventario, Cupones y Envíos
+            Laboratorio #2 · Mundo Juguete · Juguetería Online con Inventario, Cupones y Envíos
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}>
             <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--success)' }}></span>

@@ -18,8 +18,8 @@ export default function AsistenteIAPage() {
   const [tabActiva, setTabActiva] = useState('descripcion');
 
   // Estado para generador de descripción
-  const [descNombre, setDescNombre] = useState('Teclado Mecánico RGB Switch Red');
-  const [descCategoria, setDescCategoria] = useState('Periféricos');
+  const [descNombre, setDescNombre] = useState('Set Bloques Castillo Medieval 500 pcs');
+  const [descCategoria, setDescCategoria] = useState('Construcción');
   const [cargandoDesc, setCargandoDesc] = useState(false);
   const [resultadoDesc, setResultadoDesc] = useState(null);
   const [copiadoDesc, setCopiadoDesc] = useState(false);
@@ -36,7 +36,7 @@ export default function AsistenteIAPage() {
   const handleGenerarDescripcion = async (e) => {
     e.preventDefault();
     if (!descNombre.trim()) {
-      setErrorMsg('Ingresa el nombre del producto.');
+      setErrorMsg('Ingresa el nombre del juguete.');
       return;
     }
 
@@ -81,7 +81,7 @@ export default function AsistenteIAPage() {
             Asistente Copilot IA & n8n
           </h1>
           <p className="page-subtitle">
-            Integración con Agente de IA (nodo AI Agent en n8n) bajo el contrato formal <code>&#123; ok, data, error &#125;</code>.
+            Integración de Mundo Juguete con Agente de IA en n8n bajo el contrato formal <code>&#123; ok, data, error &#125;</code>.
           </p>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function AsistenteIAPage() {
             borderColor: tabActiva === 'recomendador' ? 'var(--primary)' : 'transparent'
           }}
         >
-          <ShoppingBag size={16} /> 2. Recomendador de Carrito Inteligente
+          <ShoppingBag size={16} /> 2. Recomendador de Carrito de Juguetes
         </button>
       </div>
 
@@ -125,33 +125,35 @@ export default function AsistenteIAPage() {
           <div className="card">
             <h3 style={{ fontSize: '1.15rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
               <Bot size={20} color="var(--primary)" />
-              Parámetros del Producto
+              Parámetros del Juguete
             </h3>
 
             <form onSubmit={handleGenerarDescripcion}>
               <div className="form-group">
-                <label className="form-label">Nombre del Producto</label>
+                <label className="form-label">Nombre del Juguete</label>
                 <input
                   type="text"
                   required
                   className="input"
                   value={descNombre}
                   onChange={(e) => setDescNombre(e.target.value)}
-                  placeholder="Ej. Auriculares Gamer 7.1 Inalámbricos"
+                  placeholder="Ej. Muñeca Articulada Aventurera con Accesorios"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Categoría Comercial</label>
+                <label className="form-label">Categoría del Juguete</label>
                 <select
                   className="select"
                   value={descCategoria}
                   onChange={(e) => setDescCategoria(e.target.value)}
                 >
-                  <option value="Periféricos">Periféricos</option>
-                  <option value="Audio">Audio</option>
-                  <option value="Monitores">Monitores</option>
-                  <option value="Accesorios">Accesorios</option>
+                  <option value="Construcción">Construcción</option>
+                  <option value="Muñecas y figuras">Muñecas y figuras</option>
+                  <option value="Juegos de mesa">Juegos de mesa</option>
+                  <option value="Peluches">Peluches</option>
+                  <option value="Arte y manualidades">Arte y manualidades</option>
+                  <option value="Vehículos y Exterior">Vehículos y Exterior</option>
                 </select>
               </div>
 
@@ -162,7 +164,7 @@ export default function AsistenteIAPage() {
                 style={{ width: '100%', marginTop: 10 }}
               >
                 <Sparkles size={16} />
-                {cargandoDesc ? 'Consultando AI Agent...' : 'Generar Redacción Comercial'}
+                {cargandoDesc ? 'Consultando AI Agent en n8n...' : 'Generar Redacción Comercial'}
               </button>
             </form>
           </div>
@@ -248,11 +250,11 @@ export default function AsistenteIAPage() {
           <div className="card">
             <h3 style={{ fontSize: '1.15rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
               <ShoppingBag size={20} color="var(--primary)" />
-              Simular Productos en el Carrito
+              Simular Juguetes en el Carrito
             </h3>
 
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-              El agente de IA analiza las compras cruzadas históricas y patrones de e-commerce para proponer complementos ideales.
+              El agente de IA en n8n analiza las afinidades temáticas de Mundo Juguete y las edades recomendadas para sugerir complementos ideales.
             </p>
 
             <button

@@ -1,4 +1,4 @@
-# Frontend - Tienda Online con Inventario, Cupones y Envíos (Laboratorio 2)
+# Frontend - Mundo Juguete (Juguetería Online - Laboratorio 2)
 
 Interfaz de usuario moderna y responsiva desarrollada con **React 19**, **Vite** y **React Router**. Toda la información se consume en tiempo real directamente desde el backend API de Express (`http://localhost:3001/api`), sin datos simulados.
 
@@ -19,7 +19,7 @@ Antes de levantar el frontend, asegúrate de que la base de datos y el servidor 
 ```bash
 cd backend
 npm install
-npm run init-db     # Inicializa la base de datos SQLite con los datos semilla
+npm run init-db     # Inicializa la base de datos SQLite con los datos semilla de Mundo Juguete
 npm run start       # Inicia la API en http://localhost:3001
 ```
 
@@ -54,13 +54,13 @@ npm run preview     # Previsualiza la build de producción
    - Distribución de **Órdenes por Estado** (`nueva`, `pagada`, `enviada`, `entregada`, `cancelada`).
    - Sección de **Alertas de Reposición** para productos con stock crítico (&le; 5 unidades).
 
-2. **Catálogo de Productos (`/productos`)**:
+2. **Catálogo de Juguetes (`/productos`)**:
    - Consume `GET /api/productos`.
    - Barra de búsqueda interactiva por nombre o descripción.
-   - Filtro reactivo por categoría (`Periféricos`, `Audio`, `Monitores`, `Accesorios`).
+   - Filtro reactivo por categoría (`Construcción`, `Muñecas y figuras`, `Juegos de mesa`, `Peluches`, `Arte y manualidades`, `Vehículos y Exterior`).
    - Selector de ordenamiento: por nombre (A-Z), precio (asc/desc) y stock (asc/desc).
-   - Modal para **Crear** y **Editar** productos con campos controlados.
-   - Integración con asistente IA para generar descripciones comerciales persuasivas.
+   - Modal para **Crear** y **Editar** juguetes con campos controlados.
+   - Integración con asistente IA (n8n) para generar descripciones comerciales y didácticas.
    - Modal de confirmación para eliminación con borrado lógico cuando existen órdenes históricas asociadas.
    - Visualización explícita de errores devueltos por la API (códigos 400 y 409).
 

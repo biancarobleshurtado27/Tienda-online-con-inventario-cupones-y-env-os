@@ -1,7 +1,7 @@
 {
   "name": "backend-tienda",
   "version": "1.0.0",
-  "description": "Backend API REST para Laboratorio 2 - Caso 5 Tienda online con inventario, cupones y envíos",
+  "description": "Backend API REST para Laboratorio 2 - Caso 5 Juguetería online Mundo Juguete con inventario, cupones y envíos",
   "main": "src/index.js",
   "type": "module",
   "scripts": {

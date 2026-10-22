@@ -12,7 +12,7 @@ import {
 export default function Navbar() {
   const navItems = [
     { to: '/', label: 'Dashboard', icon: BarChart3 },
-    { to: '/productos', label: 'Productos', icon: Package },
+    { to: '/productos', label: 'Juguetes', icon: Package },
     { to: '/nueva-orden', label: 'Nueva Orden', icon: ShoppingCart },
     { to: '/ordenes', label: 'Órdenes', icon: ClipboardList },
     { to: '/asistente-ia', label: 'Copilot IA', icon: Sparkles, badge: 'n8n' },
@@ -61,10 +61,10 @@ export default function Navbar() {
           </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 6 }}>
-              TechStore <span style={{ color: 'var(--primary)', fontSize: '0.85rem' }}>PRO</span>
+              Mundo Juguete <span style={{ color: 'var(--primary)', fontSize: '0.85rem' }}>PRO</span>
             </div>
             <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>
-              Laboratorio #2 · Caso 5
+              Juguetería Online · Laboratorio #2
             </div>
           </div>
         </NavLink>

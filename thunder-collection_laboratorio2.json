@@ -50,7 +50,7 @@
       "colId": "lab2-caso5-tienda",
       "containerId": "f-productos",
       "name": "GET Productos con filtro de categoría (200)",
-      "url": "http://localhost:3001/api/productos?categoria=Periféricos",
+      "url": "http://localhost:3001/api/productos?categoria=Construcción",
       "method": "GET"
     },
     {
@@ -78,7 +78,7 @@
       "method": "POST",
       "body": {
         "type": "json",
-        "raw": "{\n  \"nombre\": \"Mousepad Gamer XL\",\n  \"descripcion\": \"Superficie de microfibra impermeable 900x400mm\",\n  \"precio\": 22.50,\n  \"stock\": 25,\n  \"categoria\": \"Accesorios\"\n}"
+        "raw": "{\n  \"nombre\": \"Set Bloques Castillo Medieval\",\n  \"descripcion\": \"Bloques de construcción compatibles con puente levadizo\",\n  \"precio\": 65.00,\n  \"stock\": 25,\n  \"categoria\": \"Construcción\"\n}"
       }
     },
     {

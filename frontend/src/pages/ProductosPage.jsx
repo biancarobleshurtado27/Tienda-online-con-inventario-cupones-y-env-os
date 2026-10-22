@@ -24,7 +24,15 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const CATEGORIAS = ['Todas', 'Periféricos', 'Audio', 'Monitores', 'Accesorios'];
+const CATEGORIAS = [
+  'Todas',
+  'Construcción',
+  'Muñecas y figuras',
+  'Juegos de mesa',
+  'Peluches',
+  'Arte y manualidades',
+  'Vehículos y Exterior'
+];
 
 export default function ProductosPage() {
   const { data: productosData, loading, error, refetch } = useFetch(getProductos, [], []);
@@ -53,7 +61,7 @@ export default function ProductosPage() {
     descripcion: '',
     precio: '',
     stock: '',
-    categoria: 'Periféricos',
+    categoria: 'Construcción',
     activo: 1,
   });
 
@@ -70,7 +78,7 @@ export default function ProductosPage() {
       descripcion: '',
       precio: '',
       stock: '',
-      categoria: 'Periféricos',
+      categoria: 'Construcción',
       activo: 1,
     });
     setFormError(null);
@@ -226,14 +234,14 @@ export default function ProductosPage() {
         <div>
           <h1 className="page-title">
             <Package size={28} color="#818cf8" />
-            Catálogo de Productos
+            Catálogo de Juguetes
           </h1>
           <p className="page-subtitle">
-            Administración completa de inventario, precios y categorización con IA.
+            Administración completa de inventario infantil, precios y categorización con IA para Mundo Juguete.
           </p>
         </div>
         <button onClick={handleOpenCrear} className="btn btn-primary">
-          <Plus size={18} /> Nuevo Producto
+          <Plus size={18} /> Nuevo Juguete
         </button>
       </div>
 
@@ -312,12 +320,12 @@ export default function ProductosPage() {
 
       {/* Grid de Productos o Estado de Carga */}
       {loading ? (
-        <LoadingState message="Cargando catálogo de productos desde el backend..." />
+        <LoadingState message="Cargando catálogo de juguetes de Mundo Juguete..." />
       ) : productosFiltrados.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
           <AlertCircle size={40} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-          <h3>No se encontraron productos</h3>
-          <p style={{ marginTop: 6, fontSize: '0.9rem' }}>Intenta ajustar los criterios de búsqueda o agrega uno nuevo.</p>
+          <h3>No se encontraron juguetes</h3>
+          <p style={{ marginTop: 6, fontSize: '0.9rem' }}>Intenta ajustar los criterios de búsqueda o agrega un nuevo juguete al catálogo.</p>
         </div>
       ) : (
         <div style={{
@@ -425,20 +433,20 @@ export default function ProductosPage() {
       <Modal
         isOpen={modalAbierto}
         onClose={() => setModalAbierto(false)}
-        title={productoEnEdicion ? `Editar Producto: ${productoEnEdicion.nombre}` : 'Nuevo Producto'}
+        title={productoEnEdicion ? `Editar Juguete: ${productoEnEdicion.nombre}` : 'Nuevo Juguete'}
       >
         <form onSubmit={handleSubmit}>
           {formError && <AlertBox type="error" message={formError} onClose={() => setFormError(null)} />}
           {formSuccess && <AlertBox type="success" message={formSuccess} onClose={() => setFormSuccess(null)} />}
 
-          <FormField label="Nombre del Producto" required>
+          <FormField label="Nombre del Juguete" required>
             <input
               type="text"
               required
               className="input"
               value={formData.nombre}
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-              placeholder="Ej. Teclado Mecánico RGB Switch Red"
+              placeholder="Ej. Set Bloques Castillo Medieval 500 pcs"
             />
           </FormField>
 
@@ -474,10 +482,12 @@ export default function ProductosPage() {
               value={formData.categoria}
               onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
             >
-              <option value="Periféricos">Periféricos</option>
-              <option value="Audio">Audio</option>
-              <option value="Monitores">Monitores</option>
-              <option value="Accesorios">Accesorios</option>
+              <option value="Construcción">Construcción</option>
+              <option value="Muñecas y figuras">Muñecas y figuras</option>
+              <option value="Juegos de mesa">Juegos de mesa</option>
+              <option value="Peluches">Peluches</option>
+              <option value="Arte y manualidades">Arte y manualidades</option>
+              <option value="Vehículos y Exterior">Vehículos y Exterior</option>
             </select>
           </FormField>
 
@@ -492,7 +502,7 @@ export default function ProductosPage() {
                 style={{ padding: '3px 8px', fontSize: '0.75rem' }}
               >
                 <Sparkles size={14} />
-                {generandoIA ? 'Generando...' : 'Generar con IA'}
+                {generandoIA ? 'Generando...' : 'Generar con IA (n8n)'}
               </button>
             }
           >
@@ -501,7 +511,7 @@ export default function ProductosPage() {
               rows={3}
               value={formData.descripcion}
               onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-              placeholder="Descripción persuasiva para la ficha de producto..."
+              placeholder="Descripción persuasiva y didáctica para la ficha del juguete..."
             />
           </FormField>
 
@@ -514,7 +524,7 @@ export default function ProductosPage() {
               style={{ width: 16, height: 16, accentColor: 'var(--primary)', cursor: 'pointer' }}
             />
             <label htmlFor="activo-check" style={{ fontSize: '0.875rem', cursor: 'pointer' }}>
-              Producto habilitado para la venta en el catálogo
+              Juguete habilitado para la venta en el catálogo
             </label>
           </div>
 

@@ -34,7 +34,7 @@ async function testSuite() {
     const res = await fetch(`${BASE_URL}/productos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: 'Prueba', precio: -5, stock: 10, categoria: 'Periféricos' })
+      body: JSON.stringify({ nombre: 'Prueba', precio: -5, stock: 10, categoria: 'Construcción' })
     });
     if (res.status !== 400) throw new Error(`Status esperado 400, recibido: ${res.status}`);
     const data = await res.json();
@@ -48,17 +48,17 @@ async function testSuite() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        nombre: 'Mouse Pad XL Gamer Test',
-        descripcion: 'Superficie de tela de baja fricción',
+        nombre: 'Rompecabezas 3D Madera Castillo Test',
+        descripcion: 'Madera pulida de abedul con piezas cortadas a láser',
         precio: 22.50,
         stock: 5,
-        categoria: 'Accesorios'
+        categoria: 'Construcción'
       })
     });
     if (res.status !== 201) throw new Error(`Status esperado 201, recibido: ${res.status}`);
     const data = await res.json();
     nuevoProductoId = data.id;
-    if (!data.id || data.nombre !== 'Mouse Pad XL Gamer Test') throw new Error('Datos incorrectos en la respuesta');
+    if (!data.id || data.nombre !== 'Rompecabezas 3D Madera Castillo Test') throw new Error('Datos incorrectos en la respuesta');
   });
 
   // 4. GET /api/productos/:id no existente (404)
@@ -195,7 +195,7 @@ async function testSuite() {
     const res = await fetch(`${BASE_URL}/ia/generar-descripcion`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: 'Teclado Mecánico', categoria: 'Periféricos' })
+      body: JSON.stringify({ nombre: 'Set Bloques Castillo Medieval', categoria: 'Construcción' })
     });
     if (res.status !== 200) throw new Error(`Status esperado 200, recibido: ${res.status}`);
     const data = await res.json();
@@ -237,7 +237,7 @@ async function testSuite() {
     const res = await fetch(`${BASE_URL}/productos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: 'Producto Test', precio: 'cien', stock: 5, categoria: 'Periféricos' })
+      body: JSON.stringify({ nombre: 'Juguete Test', precio: 'cien', stock: 5, categoria: 'Juegos de mesa' })
     });
     if (res.status !== 400) throw new Error(`Status esperado 400, recibido: ${res.status}`);
     const data = await res.json();
@@ -248,7 +248,7 @@ async function testSuite() {
     const res = await fetch(`${BASE_URL}/productos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: 'Producto Test', precio: 25.50, stock: 4.8, categoria: 'Periféricos' })
+      body: JSON.stringify({ nombre: 'Juguete Test', precio: 25.50, stock: 4.8, categoria: 'Peluches' })
     });
     if (res.status !== 400) throw new Error(`Status esperado 400, recibido: ${res.status}`);
     const data = await res.json();
@@ -260,7 +260,7 @@ async function testSuite() {
     const res = await fetch(`${BASE_URL}/productos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre: 12345, precio: 20.00, stock: 10, categoria: 'Periféricos' })
+      body: JSON.stringify({ nombre: 12345, precio: 20.00, stock: 10, categoria: 'Vehículos y Exterior' })
     });
     if (res.status !== 400) throw new Error(`Status esperado 400, recibido: ${res.status}`);
     const data = await res.json();
@@ -307,10 +307,10 @@ async function testSuite() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      nombre: 'Webcam Streamer 4K Test',
+      nombre: 'Auto Radiocontrol Veloz Test',
       precio: 80.00,
       stock: 4,
-      categoria: 'Periféricos'
+      categoria: 'Vehículos y Exterior'
     })
   });
   const prodTest = await prodTestRes.json();

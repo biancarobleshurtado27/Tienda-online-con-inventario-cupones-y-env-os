@@ -290,7 +290,7 @@ export default function NuevaOrdenPage() {
       {successMsg && <AlertBox type="success" message={successMsg} onClose={() => setSuccessMsg(null)} />}
 
       {(loadingProds || loadingClientes) && (
-        <LoadingState message="Cargando catálogo de productos y clientes..." />
+        <LoadingState message="Cargando catálogo de juguetes y clientes..." />
       )}
 
       <div style={{
@@ -299,7 +299,7 @@ export default function NuevaOrdenPage() {
         gap: 24,
         alignItems: 'start'
       }}>
-        {/* Columna Izquierda: Selección de Cliente y Catálogo de Productos */}
+        {/* Columna Izquierda: Selección de Cliente y Catálogo de Juguetes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Tarjeta de Selección de Cliente */}
           <div className="card">
@@ -351,11 +351,11 @@ export default function NuevaOrdenPage() {
             )}
           </div>
 
-          {/* Selector de Productos */}
+          {/* Selector de Juguetes */}
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, marginBottom: 14 }}>
               <ShoppingCart size={18} color="var(--primary)" />
-              <span>2. Agregar Productos al Carrito</span>
+              <span>2. Agregar Juguetes al Carrito</span>
             </div>
 
             <div style={{
@@ -412,7 +412,7 @@ export default function NuevaOrdenPage() {
             {itemsCarrito.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '36px 12px', color: 'var(--text-muted)' }}>
                 <ShoppingCart size={32} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
-                <p style={{ fontSize: '0.875rem' }}>El carrito está vacío. Agrega productos de la lista.</p>
+                <p style={{ fontSize: '0.875rem' }}>El carrito está vacío. Agrega juguetes de la lista.</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
@@ -476,7 +476,7 @@ export default function NuevaOrdenPage() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Sparkles size={16} color="#c084fc" /> Recomendaciones IA (n8n)
+                    <Sparkles size={16} color="#c084fc" /> Recomendaciones IA (Mundo Juguete)
                   </span>
                   <button
                     type="button"
@@ -486,7 +486,7 @@ export default function NuevaOrdenPage() {
                     style={{ padding: '3px 8px', fontSize: '0.75rem' }}
                   >
                     <Bot size={13} />
-                    {cargandoRecom ? 'Consultando n8n...' : 'Recomendar complementos'}
+                    {cargandoRecom ? 'Consultando n8n...' : 'Recomendar juguetes'}
                   </button>
                 </div>
 
@@ -516,7 +516,7 @@ export default function NuevaOrdenPage() {
                           </span>
                         </div>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.35 }}>
-                          💡 <strong>Motivo:</strong> {rec.motivo || 'Producto complementario compatible.'}
+                          💡 <strong>Motivo:</strong> {rec.motivo || 'Juguete complementario ideal para disfrutar juntos.'}
                         </p>
                         <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end' }}>
                           <button

@@ -83,27 +83,27 @@ INSERT INTO clientes (id, nombre, email, ciudad) VALUES
 (6, 'Sofía Castillo', 'sofia.c@example.com', 'Guanacaste'),
 (7, 'Roberto Morales', 'roberto.m@example.com', 'Limón');
 
--- Catálogo de productos en diversas categorías, precios y niveles de stock
+-- Catálogo de productos en diversas categorías, precios y niveles de stock de Mundo Juguete
 -- (Incluye productos con stock crítico <= 5 para probar alertas de reposición en /api/resumen)
 INSERT INTO productos (id, nombre, descripcion, precio, stock, categoria, activo) VALUES
-(1, 'Teclado Mecánico RGB', 'Teclado switch blue con iluminación RGB personalizable y cable mallado', 65.00, 15, 'Periféricos', 1),
-(2, 'Mouse Ergonómico Inalámbrico', 'Sensor óptico de alta precisión 4000 DPI con batería recargable', 35.00, 20, 'Periféricos', 1),
-(3, 'Monitor Gamer 24" 144Hz', 'Panel IPS Full HD con tiempo de respuesta de 1ms y FreeSync', 180.00, 8, 'Monitores', 1),
-(4, 'Auriculares Bluetooth Cancelación Ruido', 'Audio Hi-Res con cancelación activa de ruido y 30h de batería', 85.00, 12, 'Audio', 1),
-(5, 'Soporte de Aluminio para Laptop', 'Ajustable en 6 niveles ergonómicos con almohadillas antideslizantes', 25.00, 30, 'Accesorios', 1),
-(6, 'Micrófono USB Condensador', 'Patrón cardioide con filtro antipop y trípode para streaming', 55.00, 10, 'Audio', 1),
-(7, 'Webcam 1080p con Micrófono Estéreo', 'Autoenfoque inteligente y obturador de privacidad integrado', 45.00, 4, 'Periféricos', 1),
-(8, 'Cable HDMI 2.1 8K Ultra Alta Velocidad', '2 metros de longitud, conectores chapados en oro 48Gbps', 15.00, 40, 'Accesorios', 1),
-(9, 'Hub USB-C 7 en 1 Multifuncional', 'Salida HDMI 4K, 3 puertos USB 3.0, lector SD y carga rápida 100W', 40.00, 3, 'Accesorios', 1),
-(10, 'Disco Sólido SSD NVMe 1TB Gen4', 'Velocidad de lectura de hasta 5000 MB/s con disipador térmico de grafeno', 95.00, 14, 'Almacenamiento', 1);
+(1, 'Set Bloques Castillo Medieval 500 pcs', 'Bloques de construcción compatibles con puente levadizo, catapultas y 4 minifiguras', 65.00, 15, 'Construcción', 1),
+(2, 'Muñeca Articulada Aventurera con Accesorios', 'Muñeca de 30cm con trajes intercambiables, mochila de campo y mascota de rescate', 35.00, 20, 'Muñecas y figuras', 1),
+(3, 'Carro Eléctrico Montable Todo Terreno 12V', 'Vehículo a batería con control remoto para padres, acelerador de pedal y luces LED', 180.00, 8, 'Vehículos y Exterior', 1),
+(4, 'Juego de Mesa Estrategia Reino Mágico', 'Juego de mesa familiar de conquista y magia con miniaturas y tablero ilustrado de 2 a 6 jugadores', 85.00, 12, 'Juegos de mesa', 1),
+(5, 'Oso de Peluche Gigante Melocotón 80cm', 'Peluche extra suave hipoalergénico con lazo de satén y costuras de alta resistencia', 25.00, 30, 'Peluches', 1),
+(6, 'Maletín de Arte y Pintura Profesional 120 Pcs', 'Set infantil completo con acuarelas, pasteles grasos, lápices de colores y caballete portátil', 55.00, 10, 'Arte y manualidades', 1),
+(7, 'Pista de Carreras Acrobática Doble Loop 360°', 'Pista modular con lanzador propulsor de resorte y 2 autos deportivos a escala', 45.00, 4, 'Vehículos y Exterior', 1),
+(8, 'Set Plastilina Moldeable Gourmet 12 Colores', 'Masa no tóxica con moldes temáticos de comida, rodillo cortador y herramientas seguras', 15.00, 40, 'Arte y manualidades', 1),
+(9, 'Figura de Acción Dragón Mecánico Sonoro', 'Figura coleccionable de 25cm con alas articuladas, rugidos de combate y luces en ojos', 40.00, 3, 'Muñecas y figuras', 1),
+(10, 'Telescopio Infantil Educativo con Trípode', 'Telescopio refractor para observación lunar y terrestre con cartas celestes didácticas', 95.00, 14, 'Construcción', 1);
 
 -- Cupones para validar reglas de negocio:
--- 1. Vigentes con usos disponibles ('BIENVENIDO10', 'SUPERTECH20')
+-- 1. Vigentes con usos disponibles ('BIENVENIDO10', 'MUNDOJUGUETE20')
 -- 2. Con límite de usos reducido para prueba de saturación ('BLACKFRIDAY50')
 -- 3. Vencido por fecha ('VENCIDO15' expiró para validar rechazo HTTP 409)
 INSERT INTO cupones (id, codigo, porcentaje, vigente_hasta, usos_maximos) VALUES
 (1, 'BIENVENIDO10', 10.0, '2026-12-31', 50),
-(2, 'SUPERTECH20', 20.0, '2026-12-31', 10),
+(2, 'MUNDOJUGUETE20', 20.0, '2026-12-31', 10),
 (3, 'BLACKFRIDAY50', 50.0, '2026-12-31', 2),
 -- Cupón con fecha pasada para validar reglas de expiración y pruebas automatizadas (409 Conflict)
 (4, 'VENCIDO15', 15.0, '2023-01-01', 100);
@@ -138,7 +138,7 @@ INSERT INTO orden_items (orden_id, producto_id, cantidad, precio_unitario) VALUE
 (3, 5, 1, 25.00),
 (3, 8, 1, 15.00);
 
--- Orden 4: Mariana Rojas (Cartago) -> NUEVA con cupón SUPERTECH20 (20% descuento)
+-- Orden 4: Mariana Rojas (Cartago) -> NUEVA con cupón MUNDOJUGUETE20 (20% descuento)
 -- Subtotal: 85.00 | Descuento: 17.00 | Envío: 0.00 (neto 68 >= 50) | Total: 68.00
 INSERT INTO ordenes (id, cliente_id, cupon_id, estado, fecha, subtotal, descuento, envio, total) VALUES
 (4, 4, 2, 'nueva', '2026-10-20 11:00:00', 85.00, 17.00, 0.00, 68.00);

@@ -2,7 +2,7 @@
   "name": "tienda-online-laboratorio2",
   "version": "1.0.0",
   "private": true,
-  "description": "Laboratorio 2 - Tienda online con inventario, cupones, envios y asistente n8n",
+  "description": "Laboratorio 2 - Juguetería online Mundo Juguete con inventario, cupones, envíos y asistente n8n",
   "scripts": {
     "server": "npm --prefix backend run dev",
     "api": "npm --prefix backend run dev",

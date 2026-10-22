@@ -1,6 +1,6 @@
 # Bitácora de Interacción con Asistente de IA (Copiloto)
 **Laboratorio #2 - React + Node.js + Base de Datos + IA**  
-**Caso 5: Tienda online con inventario, cupones y envíos**  
+**Caso 5: Juguetería online Mundo Juguete con inventario, cupones y envíos**  
 **Estudiante:** Daniel Ortiz Rivera  
 
 ---
@@ -69,3 +69,31 @@
 - **Qué se corrigió o ajustó:**
   1. Se añadió `useCallback` y un flag de recarga en `useFetch` para permitir a las vistas refrescar datos sin recargar la página.
   2. En `src/services/api.js`, se implementaron funciones centralizadas (`getProductos`, `createProducto`, `getOrdenes`, `createOrden`, `cancelarOrden`, `validarCupon`, `getResumen`, `consultarIA`) con captura de excepciones HTTP 400 y 409 para mostrarlas en el front de manera amigable.
+
+---
+
+## Prompt 6: Integración del Agente de IA con n8n y Contrato Formal `{ ok, data, error }`
+
+- **Objetivo:** Implementar la integración de Inteligencia Artificial mediante un webhook real en n8n que responda siempre bajo el contrato formal `{ ok: true|false, data: ..., error: null|"mensaje" }`, sin simulaciones locales engañosas.
+- **Prompt enviado a la IA:**
+  > "Implementa la funcionalidad obligatoria de IA mediante n8n. Crea un workflow JSON sin credenciales para un webhook que reciba una acción y responda siempre con `{ ok, data, error }`. Debe soportar generar_descripcion y recomendar. Configura el backend con N8N_WEBHOOK_URL. Si n8n no está configurado, devuelve un error claro y honesto."
+- **Qué devolvió la IA:**
+  La IA implementó el webhook en n8n y los servicios del backend, pero inicialmente utilizaba nodos con credenciales OpenAI obligatorias que fallaban al importar si el evaluador no tenía API key configurada.
+- **Qué se corrigió o ajustó:**
+  1. Se rediseñó el workflow de n8n usando nodos nativos `Webhook`, `Switch`, `Code` y `Respond to Webhook` sin dependencias de credenciales para que funcione de inmediato en cualquier instalación de n8n.
+  2. En el backend se eliminaron los generadores locales encubiertos para devolver un mensaje 100% honesto si n8n está desconectado.
+  3. Se conectó la generación de copia persuasiva en el modal de producto y las recomendaciones justificadas en el carrito de compras.
+
+---
+
+## Prompt 7: Transformación del Dominio a Juguetería "Mundo Juguete"
+
+- **Objetivo:** Adaptar el dominio completo del proyecto de una tienda de tecnología a la juguetería "Mundo Juguete", conservando intacta la arquitectura técnica, las transacciones ACID, las reglas de negocio y los contratos de API.
+- **Prompt enviado a la IA:**
+  > "Transforma el proyecto de una tienda de tecnología llamada TechStore a una juguetería llamada 'Mundo Juguete'. Usa categorías como: Construcción, Muñecas y figuras, Juegos de mesa, Peluches, Arte y manualidades, Vehículos y Exterior. Conserva precios, stock, cupones, clientes y órdenes de muestra, pero adapta descripciones, textos de frontend y backend, workflow de n8n y pruebas automatizadas."
+- **Qué devolvió la IA:**
+  La IA actualizó el esquema y los textos visibles en el navbar y catálogo, pero debió revisarse que los IDs de cupones y los montos históricos de las órdenes mantuvieran coherencia exacta con los subtotales y tarifas de envío ya registradas.
+- **Qué se corrigió o ajustó:**
+  1. Se mapearon los 10 productos semilla con precios idénticos ($65, $35, $180, $85, etc.) para que las órdenes 1 a 5 y los tests de cálculo de envío conservaran su validez matemática exacta.
+  2. Se actualizaron los templates del webhook de n8n para generar copias didácticas y recomendaciones según edades y categorías infantiles.
+  3. Se adaptaron las pruebas automatizadas en `backend/tests/test_endpoints.js` para usar los nuevos juguetes en todas las aserciones HTTP 200, 201, 400, 404 y 409.

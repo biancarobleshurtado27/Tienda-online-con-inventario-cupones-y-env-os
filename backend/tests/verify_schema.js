@@ -41,14 +41,14 @@ assertThrows('CHECK estado válido en ordenes', () => {
 // 4. CHECK precio producto > 0
 assertThrows('CHECK precio producto > 0', () => {
   db.prepare('INSERT INTO productos (nombre, precio, stock, categoria) VALUES (?, ?, ?, ?)').run(
-    'Invalido', 0, 10, 'Periféricos'
+    'Invalido', 0, 10, 'Construcción'
   );
 });
 
 // 5. CHECK stock producto >= 0
 assertThrows('CHECK stock producto >= 0', () => {
   db.prepare('INSERT INTO productos (nombre, precio, stock, categoria) VALUES (?, ?, ?, ?)').run(
-    'Invalido', 10, -1, 'Periféricos'
+    'Invalido', 10, -1, 'Construcción'
   );
 });
 
