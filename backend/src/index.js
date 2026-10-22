@@ -4,12 +4,15 @@ import dotenv from 'dotenv';
 import db from './db.js';
 import { initializeDatabase } from './initDb.js';
 
+import cookieParser from 'cookie-parser';
+
 import productosRoutes from './routes/productos.routes.js';
 import cuponesRoutes from './routes/cupones.routes.js';
 import clientesRoutes from './routes/clientes.routes.js';
 import ordenesRoutes from './routes/ordenes.routes.js';
 import resumenRoutes from './routes/resumen.routes.js';
 import iaRoutes from './routes/ia.routes.js';
+import authRoutes from './routes/auth.routes.js';
 
 dotenv.config();
 
@@ -29,7 +32,17 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir llamadas sin origen (tests, curl, Postman) o desde localhost
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+app.use(cookieParser());
 app.use(express.json());
 
 // Logger simple de peticiones
@@ -43,6 +56,7 @@ app.use((req, res, next) => {
 });
 
 // Rutas de la API
+app.use('/api/auth', authRoutes);
 app.use('/api/productos', productosRoutes);
 app.use('/api/cupones', cuponesRoutes);
 app.use('/api/clientes', clientesRoutes);

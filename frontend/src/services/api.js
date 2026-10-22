@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 async function request(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
   const config = {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -36,6 +37,33 @@ async function request(endpoint, options = {}) {
     netError.status = 503;
     throw netError;
   }
+}
+
+// -------------------------------------------------------------
+// Autenticación y Cuentas
+// -------------------------------------------------------------
+export async function loginUser(email, password) {
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function registerCustomer(customerData) {
+  return request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(customerData),
+  });
+}
+
+export async function logoutUser() {
+  return request('/auth/logout', {
+    method: 'POST',
+  });
+}
+
+export async function getSessionMe() {
+  return request('/auth/me');
 }
 
 // -------------------------------------------------------------

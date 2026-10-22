@@ -4,7 +4,19 @@ import { isValidId } from '../utils/validators.js';
 export const ordenesController = {
   getAll(req, res) {
     try {
-      const { estado, cliente_id } = req.query;
+      const { estado } = req.query;
+      let cliente_id;
+
+      if (req.user?.rol === 'cliente') {
+        // El cliente solo puede consultar sus propias órdenes
+        cliente_id = req.user.cliente_id;
+      } else if (req.user?.rol === 'personal') {
+        // El personal puede consultar todas las órdenes o filtrar por cliente_id
+        cliente_id = req.query.cliente_id;
+      } else {
+        return res.status(403).json({ error: 'Acceso denegado' });
+      }
+
       const ordenes = ordenesService.getAll({ estado, cliente_id });
       res.status(200).json(ordenes);
     } catch (error) {
@@ -22,6 +34,12 @@ export const ordenesController = {
       if (!orden) {
         return res.status(404).json({ error: `Orden con ID ${id} no encontrada` });
       }
+
+      // Si es cliente, validar estrictamente que la orden le pertenezca
+      if (req.user?.rol === 'cliente' && orden.cliente_id !== req.user.cliente_id) {
+        return res.status(403).json({ error: 'Acceso denegado: no puedes consultar órdenes de otros clientes' });
+      }
+
       res.status(200).json(orden);
     } catch (error) {
       res.status(error.statusCode || 500).json({ error: error.message });
@@ -30,7 +48,18 @@ export const ordenesController = {
 
   create(req, res) {
     try {
-      const { cliente_id, items, codigo_cupon, cupon_codigo, estado_inicial } = req.body || {};
+      // Un usuario de personal no debe usar el carrito público como si fuera cliente
+      if (req.user?.rol !== 'cliente') {
+        return res.status(403).json({ error: 'Acceso denegado: el personal no puede crear órdenes desde el carrito de clientes' });
+      }
+
+      // El backend obtiene obligatoriamente el cliente_id de la sesión del usuario
+      const cliente_id = req.user.cliente_id;
+      if (!cliente_id) {
+        return res.status(400).json({ error: 'La cuenta no tiene un perfil de cliente asociado' });
+      }
+
+      const { items, codigo_cupon, cupon_codigo, estado_inicial } = req.body || {};
       const nuevaOrden = ordenesService.crearOrden({
         cliente_id,
         items,

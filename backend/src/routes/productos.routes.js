@@ -1,15 +1,18 @@
 import { Router } from 'express';
 import { productosController } from '../controllers/productos.controller.js';
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
-// CRUD completo para productos
+// Rutas de administración (deben ir antes de /:id para evitar colisiones)
+router.get('/admin', requireAuth, requireRole('personal'), productosController.getAllAdmin);
+router.post('/', requireAuth, requireRole('personal'), productosController.create);
+router.put('/:id', requireAuth, requireRole('personal'), productosController.update);
+router.delete('/:id', requireAuth, requireRole('personal'), productosController.delete);
+
+// Rutas públicas (catálogo y detalle de productos activos)
 router.get('/', productosController.getAll);
-router.get('/admin', productosController.getAllAdmin);
 router.get('/categorias', productosController.getCategorias);
 router.get('/:id', productosController.getById);
-router.post('/', productosController.create);
-router.put('/:id', productosController.update);
-router.delete('/:id', productosController.delete);
 
 export default router;

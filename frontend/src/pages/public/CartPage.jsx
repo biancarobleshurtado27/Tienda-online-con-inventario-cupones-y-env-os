@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { 
-  getClientes, 
-  createCliente, 
   validarCupon, 
   getCostoEnvio, 
   createOrden 
@@ -23,7 +22,8 @@ import {
   AlertCircle, 
   Sparkles,
   ShieldCheck,
-  RotateCcw
+  RotateCcw,
+  LogIn
 } from 'lucide-react';
 
 const CIUDADES_COSTA_RICA = [
@@ -38,18 +38,18 @@ const CIUDADES_COSTA_RICA = [
 
 export default function CartPage() {
   const { cart, totalItems, subtotal, clearCart } = useCart();
+  const { user, isAuthenticated, isCustomer, isStaff } = useAuth();
+  const navigate = useNavigate();
 
-  // Estados de Clientes
-  const [clientes, setClientes] = useState([]);
-  const [loadingClientes, setLoadingClientes] = useState(true);
-  const [clienteId, setClienteId] = useState('');
-  const [modoNuevoCliente, setModoNuevoCliente] = useState(false);
-  const [nuevoCliente, setNuevoCliente] = useState({
-    nombre: '',
-    email: '',
-    ciudad: 'San José'
-  });
-  const [creandoCliente, setCreandoCliente] = useState(false);
+  // Ciudad de entrega (por defecto la del perfil del cliente autenticado o San José)
+  const [ciudadEntrega, setCiudadEntrega] = useState(user?.ciudad || 'San José');
+
+  // Actualizar si el usuario cambia o carga
+  useEffect(() => {
+    if (user?.ciudad) {
+      setCiudadEntrega(user.ciudad);
+    }
+  }, [user]);
 
   // Estados de Cupón
   const [codigoCupon, setCodigoCupon] = useState('');
@@ -66,37 +66,9 @@ export default function CartPage() {
   const [errorOrden, setErrorOrden] = useState(null);
   const [ordenCreada, setOrdenCreada] = useState(null);
 
-  // Cargar clientes existentes
+  // Actualizar cálculo de envío cuando cambia la ciudad o el subtotal
   useEffect(() => {
-    let mounted = true;
-    setLoadingClientes(true);
-    getClientes()
-      .then(data => {
-        if (mounted && Array.isArray(data)) {
-          setClientes(data);
-          if (data.length > 0 && !clienteId) {
-            setClienteId(String(data[0].id));
-          }
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (mounted) setLoadingClientes(false);
-      });
-    return () => { mounted = false; };
-  }, []);
-
-  // Cliente actualmente seleccionado
-  const clienteSeleccionado = useMemo(() => {
-    if (modoNuevoCliente) {
-      return nuevoCliente;
-    }
-    return clientes.find(c => String(c.id) === String(clienteId)) || null;
-  }, [clientes, clienteId, modoNuevoCliente, nuevoCliente]);
-
-  // Actualizar cálculo de envío cuando cambia la ciudad del cliente o el subtotal
-  useEffect(() => {
-    const ciudad = clienteSeleccionado?.ciudad || 'San José';
+    const ciudad = ciudadEntrega || 'San José';
 
     // Regla de envío gratis para compras de $50 o más
     if (subtotal >= 50.00) {
@@ -111,10 +83,9 @@ export default function CartPage() {
         }
       })
       .catch(() => {
-        // Fallback estándar
         setCostoEnvio(ciudad === 'San José' ? 5.00 : 8.00);
       });
-  }, [clienteSeleccionado?.ciudad, subtotal]);
+  }, [ciudadEntrega, subtotal]);
 
   // Descuento estimado del cupón
   const montoDescuento = useMemo(() => {
@@ -128,7 +99,6 @@ export default function CartPage() {
     return conDescuento + costoEnvio;
   }, [subtotal, montoDescuento, costoEnvio]);
 
-  // Manejo de aplicación de cupón
   const handleAplicarCupon = async (e) => {
     e.preventDefault();
     if (!codigoCupon.trim()) {
@@ -141,7 +111,7 @@ export default function CartPage() {
     setSuccessCupon(null);
 
     try {
-      const cid = clienteSeleccionado && clienteSeleccionado.id ? clienteSeleccionado.id : (clientes[0]?.id || 1);
+      const cid = user?.cliente_id || 1;
       const res = await validarCupon(codigoCupon.trim(), cid, subtotal);
 
       if (res && res.valido && res.cupon) {
@@ -170,31 +140,6 @@ export default function CartPage() {
     setErrorCupon(null);
   };
 
-  // Crear cliente nuevo si está en modo registro rápido
-  const handleCrearClienteRapido = async () => {
-    if (!nuevoCliente.nombre.trim()) {
-      throw new Error('Por favor ingresa tu nombre completo.');
-    }
-    if (!nuevoCliente.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nuevoCliente.email.trim())) {
-      throw new Error('Por favor ingresa un correo electrónico válido.');
-    }
-
-    setCreandoCliente(true);
-    try {
-      const creado = await createCliente({
-        nombre: nuevoCliente.nombre.trim(),
-        email: nuevoCliente.email.trim().toLowerCase(),
-        ciudad: nuevoCliente.ciudad
-      });
-      setClientes(prev => [...prev, creado]);
-      setClienteId(String(creado.id));
-      setModoNuevoCliente(false);
-      return creado.id;
-    } finally {
-      setCreandoCliente(false);
-    }
-  };
-
   // Confirmar y Crear Orden
   const handleConfirmarOrden = async () => {
     setErrorOrden(null);
@@ -204,22 +149,20 @@ export default function CartPage() {
       return;
     }
 
+    if (!isAuthenticated) {
+      navigate('/iniciar-sesion?redirect=/carrito');
+      return;
+    }
+
+    if (isStaff) {
+      setErrorOrden('El personal de tienda no puede realizar compras desde el carrito de clientes.');
+      return;
+    }
+
     setCreandoOrden(true);
 
     try {
-      let finalClienteId = clienteId;
-
-      // Si está en modo nuevo cliente, registrarlo primero
-      if (modoNuevoCliente) {
-        finalClienteId = await handleCrearClienteRapido();
-      }
-
-      if (!finalClienteId) {
-        throw new Error('Por favor selecciona o registra un cliente para la orden.');
-      }
-
       const payload = {
-        cliente_id: Number(finalClienteId),
         items: cart.map(item => ({
           producto_id: Number(item.id),
           cantidad: Number(item.cantidad)
@@ -467,143 +410,154 @@ export default function CartPage() {
 
         {/* Columna Derecha: Cliente, Cupón y Resumen Financiero */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* PASO 1: Selección o Registro del Cliente */}
+          {/* PASO 1: Datos del Destinatario según Autenticación */}
           <div className="card" style={{ padding: '22px' }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
+            <h3 style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '1.05rem',
+              fontWeight: 800,
+              color: 'var(--text-main)',
+              display: 'inline-flex',
               alignItems: 'center',
-              marginBottom: 14
+              gap: 8,
+              margin: '0 0 14px 0'
             }}>
-              <h3 style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: '1.05rem',
-                fontWeight: 800,
-                color: 'var(--text-main)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                margin: 0
+              <User size={18} color="var(--primary)" />
+              <span>1. Cuenta y Destino</span>
+            </h3>
+
+            {!isAuthenticated ? (
+              <div style={{
+                backgroundColor: '#FAF7F2',
+                borderRadius: 14,
+                padding: '16px',
+                border: '1px dashed var(--border-color)',
+                textAlign: 'center'
               }}>
-                <User size={18} color="var(--primary)" />
-                <span>1. Datos del Destinatario</span>
-              </h3>
+                <p style={{
+                  fontSize: '0.86rem',
+                  color: 'var(--text-main)',
+                  fontWeight: 600,
+                  marginBottom: 12
+                }}>
+                  Para confirmar tu pedido debes iniciar sesión o registrarte como cliente.
+                </p>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                  <Link
+                    to="/iniciar-sesion?redirect=/carrito"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '8px 16px',
+                      borderRadius: 9999,
+                      backgroundColor: 'var(--primary)',
+                      color: '#FFFFFF',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <LogIn size={14} />
+                    <span>Iniciar sesión</span>
+                  </Link>
 
-              <button
-                onClick={() => setModoNuevoCliente(!modoNuevoCliente)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  fontSize: '0.78rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4
-                }}
-              >
-                {modoNuevoCliente ? (
-                  <>
-                    <User size={12} /> Seleccionar existente
-                  </>
-                ) : (
-                  <>
-                    <UserPlus size={12} /> Registrarme
-                  </>
-                )}
-              </button>
-            </div>
-
-            {modoNuevoCliente ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: 4 }}>
-                    Nombre Completo
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Sofía Valverde"
-                    value={nuevoCliente.nombre}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
-                    className="input"
-                    style={{ fontSize: '0.86rem' }}
-                  />
+                  <Link
+                    to="/registro"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '8px 16px',
+                      borderRadius: 9999,
+                      backgroundColor: '#FFFFFF',
+                      color: 'var(--text-main)',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <UserPlus size={14} />
+                    <span>Crear cuenta</span>
+                  </Link>
+                </div>
+              </div>
+            ) : isStaff ? (
+              <div style={{
+                backgroundColor: '#FFF1F2',
+                border: '1px solid #FFE4E6',
+                borderRadius: 14,
+                padding: '14px',
+                color: '#BE123C',
+                fontSize: '0.84rem',
+                lineHeight: 1.45
+              }}>
+                <strong>Sesión de Personal de Tienda:</strong> Por políticas de seguridad, las cuentas del personal no pueden comprar juguetes desde el carrito público.
+                <div style={{ marginTop: 10 }}>
+                  <Link
+                    to="/admin"
+                    style={{
+                      display: 'inline-block',
+                      color: 'var(--text-main)',
+                      fontWeight: 700,
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    Ir al Panel de Administración →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{
+                  backgroundColor: '#FAF7F2',
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  marginBottom: 14,
+                  fontSize: '0.85rem'
+                }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{user.nombre}</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{user.email}</div>
+                  <div style={{ color: 'var(--pastel-lavender-text)', fontSize: '0.76rem', fontWeight: 700, marginTop: 4 }}>
+                    Cuenta de cliente verificada (ID #{user.cliente_id})
+                  </div>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: 4 }}>
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="sofia@ejemplo.com"
-                    value={nuevoCliente.email}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
-                    className="input"
-                    style={{ fontSize: '0.86rem' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: 4 }}>
-                    Ciudad de Entrega
+                    Ciudad de Destino (para cálculo de envío)
                   </label>
                   <select
-                    value={nuevoCliente.ciudad}
-                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, ciudad: e.target.value })}
+                    value={ciudadEntrega}
+                    onChange={(e) => setCiudadEntrega(e.target.value)}
                     className="select"
-                    style={{ fontSize: '0.86rem' }}
+                    style={{ fontSize: '0.86rem', width: '100%' }}
                   >
                     {CIUDADES_COSTA_RICA.map(ciudad => (
                       <option key={ciudad} value={ciudad}>{ciudad}</option>
                     ))}
                   </select>
                 </div>
-              </div>
-            ) : (
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: 6 }}>
-                  Cliente Registrado
-                </label>
-                {loadingClientes ? (
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Cargando clientes...</p>
-                ) : (
-                  <select
-                    value={clienteId}
-                    onChange={(e) => setClienteId(e.target.value)}
-                    className="select"
-                    style={{ fontSize: '0.86rem' }}
-                  >
-                    {clientes.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.nombre} ({c.ciudad}) · {c.email}
-                      </option>
-                    ))}
-                  </select>
-                )}
+
+                <div style={{
+                  marginTop: 14,
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  backgroundColor: 'var(--bg-main)',
+                  fontSize: '0.78rem',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <span>Destino: <strong>{ciudadEntrega}</strong></span>
+                  <span style={{ color: costoEnvio === 0 ? 'var(--pastel-mint-text)' : 'var(--text-main)', fontWeight: 700 }}>
+                    {costoEnvio === 0 ? 'Envío Gratis ($50+)' : `Tarifa de envío: $${costoEnvio.toFixed(2)}`}
+                  </span>
+                </div>
               </div>
             )}
-
-            {/* Aviso de ciudad y costo base */}
-            <div style={{
-              marginTop: 14,
-              padding: '8px 12px',
-              borderRadius: 8,
-              backgroundColor: 'var(--bg-main)',
-              fontSize: '0.78rem',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span>Destino: <strong>{clienteSeleccionado?.ciudad || 'San José'}</strong></span>
-              <span style={{ color: costoEnvio === 0 ? 'var(--pastel-mint-text)' : 'var(--text-main)', fontWeight: 700 }}>
-                {costoEnvio === 0 ? '¡Envío Gratis! ($50+)' : `Envío estándar: $${costoEnvio.toFixed(2)}`}
-              </span>
-            </div>
           </div>
 
           {/* PASO 2: Aplicación de Cupón */}

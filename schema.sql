@@ -9,6 +9,7 @@ PRAGMA foreign_keys = ON;
 DROP TABLE IF EXISTS orden_items;
 DROP TABLE IF EXISTS ordenes;
 DROP TABLE IF EXISTS cupones;
+DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS clientes;
 DROP TABLE IF EXISTS productos;
 
@@ -62,12 +63,26 @@ CREATE TABLE orden_items (
     precio_unitario REAL NOT NULL CHECK (precio_unitario > 0)
 );
 
+-- 6. Tabla de Cuentas / Usuarios (Autenticación y Roles)
+CREATE TABLE usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    rol TEXT NOT NULL CHECK (rol IN ('cliente', 'personal')),
+    cliente_id INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
+    activo INTEGER NOT NULL DEFAULT 1 CHECK (activo IN (0, 1)),
+    creado_en TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Índices para optimizar consultas frecuentes y llaves foráneas
 CREATE INDEX IF NOT EXISTS idx_ordenes_cliente_id ON ordenes(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_ordenes_cupon_id ON ordenes(cupon_id);
 CREATE INDEX IF NOT EXISTS idx_orden_items_orden_id ON orden_items(orden_id);
 CREATE INDEX IF NOT EXISTS idx_orden_items_producto_id ON orden_items(producto_id);
 CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria);
+CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
+CREATE INDEX IF NOT EXISTS idx_usuarios_cliente_id ON usuarios(cliente_id);
 
 -- ==========================================================
 -- Datos Iniciales de Prueba (Seed Data Reproducible)
@@ -153,3 +168,9 @@ INSERT INTO ordenes (id, cliente_id, cupon_id, estado, fecha, subtotal, descuent
 
 INSERT INTO orden_items (orden_id, producto_id, cantidad, precio_unitario) VALUES
 (5, 6, 1, 55.00);
+
+-- Cuentas de usuario de prueba (contraseña para todas: Password123!)
+INSERT INTO usuarios (id, nombre, email, password_hash, rol, cliente_id, activo) VALUES
+(1, 'Elena Vargas (Administración)', 'personal@mundojuguete.cr', '$2b$10$/KY7dnD1y59Su.Ke1YtAyu7CuZj00tVX20IdjPfWpyU2brFcCc19u', 'personal', NULL, 1),
+(2, 'Carlos Mora', 'carlos.mora@example.com', '$2b$10$/KY7dnD1y59Su.Ke1YtAyu7CuZj00tVX20IdjPfWpyU2brFcCc19u', 'cliente', 1, 1),
+(3, 'Lucía Fernández', 'lucia.f@example.com', '$2b$10$/KY7dnD1y59Su.Ke1YtAyu7CuZj00tVX20IdjPfWpyU2brFcCc19u', 'cliente', 2, 1);

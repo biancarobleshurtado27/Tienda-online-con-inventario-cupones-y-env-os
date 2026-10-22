@@ -97,3 +97,21 @@
   1. Se mapearon los 10 productos semilla con precios idénticos ($65, $35, $180, $85, etc.) para que las órdenes 1 a 5 y los tests de cálculo de envío conservaran su validez matemática exacta.
   2. Se actualizaron los templates del webhook de n8n para generar copias didácticas y recomendaciones según edades y categorías infantiles.
   3. Se adaptaron las pruebas automatizadas en `backend/tests/test_endpoints.js` para usar los nuevos juguetes en todas las aserciones HTTP 200, 201, 400, 404 y 409.
+
+---
+
+## Prompt 8: Implementación de Autenticación Real con Dos Tipos de Cuenta (Cliente y Personal)
+
+- **Objetivo:** Implementar un sistema de autenticación y autorización real con tokens JWT en cookies `httpOnly`, contraseñas con bcrypt, roles diferenciados (`cliente` y `personal`), protección estricta en el backend y separación de vistas en React.
+- **Prompt enviado a la IA:**
+  > "Implementa autenticación real con dos tipos de cuenta para 'Mundo Juguete': Cliente (catálogo, carrito, crear y consultar únicamente sus propias órdenes) y Personal de tienda (acceso al panel administrativo, inventario, métricas y gestión de todas las órdenes). No simules autenticación en React: la autorización debe validarse obligatoriamente en el backend. Crea la tabla usuarios en SQLite con contraseñas hasheadas con bcryptjs, JWT en cookie httpOnly sameSite: 'lax', endpoints de auth (/register, /login, /logout, /me), middlewares requireAuth y requireRole, aislamiento de órdenes para clientes, y en el frontend AuthContext, páginas /iniciar-sesion, /registro y /mi-cuenta con diseño Nube de algodón."
+- **Qué devolvió la IA:**
+  La IA diseñó la tabla `usuarios` y los endpoints de Express, pero inicialmente vinculaba las órdenes a través del usuario y no a través del `cliente_id` existente, lo cual podía romper las órdenes históricas. También en el frontend, el carrito requería seleccionar el cliente en lugar de inferirlo de la sesión autenticada.
+- **Qué se corrigió o ajustó:**
+  1. **Relación Atómica Usuarios-Clientes:** Se estableció que cada usuario con rol `cliente` referencia un registro en la tabla `clientes` mediante `cliente_id`. Al registrarse en `POST /api/auth/register`, se crea atómicamente el registro en `clientes` (guardando su ciudad para costos de envío) y en `usuarios` dentro de una transacción.
+  2. **Aislamiento Estricto de Órdenes:** En `ordenes.controller.js`, cuando el rol es `cliente`, se ignora cualquier `cliente_id` que venga en la petición y se fuerza el `req.user.cliente_id`. Además, `GET /api/ordenes` filtra estrictamente por su propio `cliente_id`, y `GET /api/ordenes/:id` devuelve un HTTP 403 si el cliente intenta consultar la orden de otro cliente.
+  3. **Inhabilitación de Compras para Personal:** El personal de tienda es rechazado con HTTP 403 al intentar enviar órdenes desde el carrito público, obligando a usar las cuentas de clientes para comprar.
+  4. **Seguridad y Cookies:** Se configuró `cookie-parser` con `credentials: true` en CORS, cookie `httpOnly`, `sameSite: 'lax'`, y se protegieron todas las rutas administrativas de productos, clientes, cupones y resumen.
+  5. **Batería de Pruebas Automatizadas:** Se creó `backend/tests/test_auth.js` con 23 casos de prueba cubriendo registro, login, logout, consulta de sesión, 401 sin sesión, 403 por rol, y aislamiento de órdenes. Adicionalmente, se adaptó `test_endpoints.js` (28 pruebas) para autenticar las peticiones antes de validar la lógica de negocio.
+  6. **Diseño Visual en Frontend:** Se implementaron las vistas `/iniciar-sesion` (con pestañas para cliente y personal), `/registro` (exclusivo para clientes) y `/mi-cuenta` (con bienvenida, historial de pedidos y modal de detalles), respetando la estética *"Nube de algodón"*, iconos lineales de Lucide y sin emojis.
+
