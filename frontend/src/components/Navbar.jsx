@@ -1,36 +1,47 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
-  BarChart3, 
-  Package, 
-  ShoppingCart, 
-  ClipboardList, 
   Sparkles,
-  Store
+  Store,
+  Search,
+  ShoppingCart,
+  User,
+  Package,
+  Layers,
+  Shapes
 } from 'lucide-react';
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
   const navItems = [
-    { to: '/', label: 'Dashboard', icon: BarChart3 },
-    { to: '/productos', label: 'Juguetes', icon: Package },
-    { to: '/nueva-orden', label: 'Nueva Orden', icon: ShoppingCart },
-    { to: '/ordenes', label: 'Órdenes', icon: ClipboardList },
-    { to: '/asistente-ia', label: 'Copilot IA', icon: Sparkles, badge: 'n8n' },
+    { to: '/', label: 'Resumen' },
+    { to: '/productos', label: 'Catálogo' },
+    { to: '/productos?nuevo=1', label: 'Editor de Juguete' },
+    { to: '/nueva-orden', label: 'Carrito Mágico' },
+    { to: '/ordenes', label: 'Órdenes' },
   ];
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/productos?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
 
   return (
     <header style={{
       borderBottom: '1px solid var(--border-color)',
-      backgroundColor: 'rgba(255, 255, 255, 0.92)',
-      backdropFilter: 'blur(12px)',
+      backgroundColor: '#FFFFFF',
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      boxShadow: '0 2px 12px rgba(47, 38, 54, 0.03)'
+      boxShadow: '0 2px 10px rgba(47, 38, 54, 0.03)'
     }}>
       <div className="container" style={{
-        paddingTop: 12,
-        paddingBottom: 12,
+        paddingTop: 10,
+        paddingBottom: 10,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -43,123 +54,178 @@ export default function Navbar() {
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 12, 
+            gap: 10, 
             textDecoration: 'none',
             color: 'var(--text-main)'
           }}
         >
           <div style={{
-            width: 42,
-            height: 42,
-            borderRadius: 14,
-            background: 'linear-gradient(135deg, var(--pastel-rose) 0%, var(--pastel-lavender) 100%)',
+            width: 38,
+            height: 38,
+            borderRadius: 12,
+            background: 'linear-gradient(135deg, #F39EA8 0%, #B79FE2 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 6px 16px rgba(222, 123, 148, 0.25)',
+            boxShadow: '0 4px 12px rgba(243, 158, 168, 0.25)',
             flexShrink: 0
           }}>
-            <Store size={22} color="#ffffff" strokeWidth={2.2} />
+            <Shapes size={20} color="#ffffff" strokeWidth={2.4} />
           </div>
           <div>
             <div style={{
               fontFamily: 'var(--font-heading)',
               fontWeight: 800,
-              fontSize: '1.2rem',
+              fontSize: '1.18rem',
               letterSpacing: '-0.01em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              color: 'var(--text-main)'
+              color: '#342639',
+              lineHeight: 1.15
             }}>
               Mundo Juguete
-              <span style={{
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                letterSpacing: '0.04em',
-                padding: '2px 8px',
-                borderRadius: 9999,
-                backgroundColor: 'var(--pastel-butter-light)',
-                color: 'var(--pastel-butter-text)',
-                border: '1px solid rgba(214, 164, 41, 0.3)'
-              }}>
-                PRO
-              </span>
             </div>
-            <div style={{ fontSize: '0.725rem', color: 'var(--text-subtle)', fontWeight: 500 }}>
-              Juguetería Online · Laboratorio #2
+            <div style={{ fontSize: '0.72rem', color: '#978B9B', fontWeight: 500 }}>
+              Historias que inspiran sonrisas
             </div>
           </div>
         </NavLink>
 
         {/* Navigation links */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === '/'}
-                style={({ isActive }) => ({
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '8px 16px',
-                  borderRadius: 9999,
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 700,
-                  transition: 'all var(--transition-fast)',
-                  backgroundColor: isActive ? 'var(--pastel-lavender-light)' : 'transparent',
-                  color: isActive ? 'var(--pastel-lavender-text)' : 'var(--text-muted)',
-                  border: isActive ? '1px solid rgba(142, 116, 190, 0.25)' : '1px solid transparent',
-                  boxShadow: isActive ? '0 2px 8px rgba(142, 116, 190, 0.12)' : 'none'
-                })}
-              >
-                <Icon size={17} strokeWidth={2.2} />
-                <span>{item.label}</span>
-                {item.badge && (
-                  <span style={{
-                    fontSize: '0.65rem',
-                    padding: '2px 8px',
-                    borderRadius: 9999,
-                    backgroundColor: 'var(--pastel-rose-light)',
-                    color: 'var(--pastel-rose-text)',
-                    border: '1px solid rgba(222, 123, 148, 0.25)',
-                    fontWeight: 800,
-                    letterSpacing: '0.02em'
-                  }}>
-                    {item.badge}
-                  </span>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        {/* Server status indicator */}
-        <div style={{
+        <nav style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          fontSize: '0.75rem',
-          color: 'var(--text-subtle)',
-          backgroundColor: 'var(--surface-card)',
-          padding: '6px 12px',
+          gap: 6,
+          backgroundColor: '#FBF8F5',
+          padding: '4px 6px',
           borderRadius: 9999,
-          border: '1px solid var(--border-color)',
-          fontWeight: 600
+          border: '1px solid #EFE8DF'
         }}>
-          <span style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            backgroundColor: 'var(--pastel-mint)',
-            boxShadow: '0 0 6px rgba(65, 160, 125, 0.4)',
-            display: 'inline-block'
-          }}></span>
-          <span>API :3001 Conectada</span>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              style={({ isActive }) => ({
+                padding: '6px 16px',
+                borderRadius: 9999,
+                textDecoration: 'none',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                transition: 'all 0.15s ease',
+                backgroundColor: isActive ? '#ED849A' : 'transparent',
+                color: isActive ? '#FFFFFF' : '#6A5E70',
+                boxShadow: isActive ? '0 2px 8px rgba(237, 132, 154, 0.3)' : 'none'
+              })}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Right tools: Search, AI button, Cart, Avatar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* Search box */}
+          <form onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>
+            <Search 
+              size={15} 
+              style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#A095A6' }} 
+            />
+            <input
+              type="text"
+              placeholder="Buscar maravillas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                backgroundColor: '#FBF8F5',
+                border: '1px solid #EFE8DF',
+                borderRadius: 9999,
+                padding: '7px 14px 7px 32px',
+                fontSize: '0.8rem',
+                color: '#342639',
+                outline: 'none',
+                width: 170,
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => { e.target.style.borderColor = '#C5B5D6'; e.target.style.width = '200px'; }}
+              onBlur={(e) => { e.target.style.borderColor = '#EFE8DF'; e.target.style.width = '170px'; }}
+            />
+          </form>
+
+          {/* AI Copilot Button */}
+          <NavLink
+            to="/asistente-ia"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              backgroundColor: '#EDE7F6',
+              color: '#7C55C7',
+              border: '1px solid #DFD5F0',
+              padding: '6px 14px',
+              borderRadius: 9999,
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Sparkles size={14} strokeWidth={2.4} />
+            <span>Asistente AI</span>
+          </NavLink>
+
+          {/* Cart Icon button */}
+          <NavLink
+            to="/nueva-orden"
+            title="Carrito de Compras"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              backgroundColor: '#FBF8F5',
+              border: '1px solid #EFE8DF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#342639',
+              position: 'relative',
+              textDecoration: 'none'
+            }}
+          >
+            <ShoppingCart size={17} strokeWidth={2.2} />
+            <span style={{
+              position: 'absolute',
+              top: -3,
+              right: -3,
+              backgroundColor: '#ED849A',
+              color: '#FFFFFF',
+              fontSize: '0.65rem',
+              fontWeight: 800,
+              borderRadius: 9999,
+              padding: '1px 5px',
+              minWidth: 16,
+              textAlign: 'center',
+              lineHeight: 1.2
+            }}>
+              5
+            </span>
+          </NavLink>
+
+          {/* User Avatar */}
+          <div
+            title="Perfil de Usuario"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              backgroundColor: '#6A5372',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              cursor: 'pointer'
+            }}
+          >
+            <User size={18} strokeWidth={2.2} />
+          </div>
         </div>
       </div>
     </header>
