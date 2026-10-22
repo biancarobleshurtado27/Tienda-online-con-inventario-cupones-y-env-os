@@ -1,49 +1,106 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Quicksand', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Color Palette - Modern Dark Theme */
-  --bg-main: #0b0f19;
-  --bg-card: #111827;
-  --bg-card-hover: #1f2937;
-  --bg-subtle: #1e293b;
-  --border-color: #2e384d;
-  --border-focus: #6366f1;
-
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
-
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-light: rgba(99, 102, 241, 0.15);
-
-  --success: #10b981;
-  --success-light: rgba(16, 185, 129, 0.15);
+  /* ==========================================================
+     PALETA DE COLORES: NUBE DE ALGODÓN & CATÁLOGO DE CUENTO
+     ========================================================== */
   
-  --warning: #f59e0b;
-  --warning-light: rgba(245, 158, 11, 0.15);
+  /* Fondos */
+  --bg-main: #FAF7F2;          /* Crema muy claro */
+  --bg-card: #FFFFFF;          /* Blanco cálido para tarjetas y superficies */
+  --bg-card-hover: #FDFBF8;    /* Elevación sutil al pasar cursor */
+  --bg-subtle: #F4EFE6;        /* Tono crema avena para agrupaciones */
+  --bg-glass: rgba(255, 255, 255, 0.92);
+  --border-color: #EBE3D7;      /* Borde sutil color lino / arena suave */
+  --border-focus: #967EC3;      /* Enfoque lavanda accesible */
 
-  --danger: #ef4444;
-  --danger-light: rgba(239, 68, 68, 0.15);
+  /* Textos (Gris Ciruela Oscuro con Contraste Accesible WCAG AAA) */
+  --text-main: #2F2636;        /* Gris ciruela profundo para lectura nítida */
+  --text-muted: #665A70;       /* Tono medio ciruela-pizarra */
+  --text-subtle: #8F8299;      /* Gris lavanda suave para pies de foto y notas */
+  --text-heading: #241C2B;     /* Ciruela profundo para títulos amigables */
 
-  --info: #0ea5e9;
-  --info-light: rgba(14, 165, 233, 0.15);
+  /* Colores de Acento Pastel */
+  /* Rosa Palo */
+  --pastel-rose: #DE7B94;
+  --pastel-rose-hover: #D16B85;
+  --pastel-rose-light: #FDF1F4;
+  --pastel-rose-border: #F7D0DA;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  /* Lavanda Suave */
+  --pastel-lavender: #8E74BE;
+  --pastel-lavender-hover: #7E63AF;
+  --pastel-lavender-light: #F3EFFB;
+  --pastel-lavender-border: #DBCFF4;
+
+  /* Celeste Pastel */
+  --pastel-sky: #5A9EC4;
+  --pastel-sky-hover: #4A8EB5;
+  --pastel-sky-light: #EDF6FC;
+  --pastel-sky-border: #C6E0F1;
+
+  /* Amarillo Mantequilla */
+  --pastel-butter: #D6A429;
+  --pastel-butter-hover: #C59318;
+  --pastel-butter-light: #FFF9E6;
+  --pastel-butter-border: #F6E5AD;
+
+  /* Verde Menta Suave (Éxito) */
+  --pastel-mint: #41A07D;
+  --pastel-mint-hover: #338F6D;
+  --pastel-mint-light: #EEF8F3;
+  --pastel-mint-border: #BFE6D5;
+
+  /* Fresa Suave (Alerta / Error) */
+  --pastel-berry: #CF5663;
+  --pastel-berry-hover: #BD4553;
+  --pastel-berry-light: #FDF2F3;
+  --pastel-berry-border: #F9CAD0;
+
+  /* Mapeo de Variables Semánticas */
+  --primary: var(--pastel-lavender);
+  --primary-hover: var(--pastel-lavender-hover);
+  --primary-light: var(--pastel-lavender-light);
+  --primary-border: var(--pastel-lavender-border);
+
+  --success: var(--pastel-mint);
+  --success-light: var(--pastel-mint-light);
+  --success-border: var(--pastel-mint-border);
+
+  --warning: var(--pastel-butter);
+  --warning-light: var(--pastel-butter-light);
+  --warning-border: var(--pastel-butter-border);
+
+  --danger: var(--pastel-berry);
+  --danger-light: var(--pastel-berry-light);
+  --danger-border: var(--pastel-berry-border);
+
+  --info: var(--pastel-sky);
+  --info-light: var(--pastel-sky-light);
+  --info-border: var(--pastel-sky-border);
+
+  /* Bordes Redondeados tipo "Nube" */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.35);
+  /* Sombras Algodonosas Suaves */
+  --shadow-sm: 0 2px 6px rgba(120, 95, 130, 0.04);
+  --shadow-md: 0 8px 24px -4px rgba(120, 95, 130, 0.06), 0 2px 6px -1px rgba(120, 95, 130, 0.03);
+  --shadow-lg: 0 16px 36px -6px rgba(120, 95, 130, 0.09), 0 4px 12px -2px rgba(120, 95, 130, 0.03);
+  --shadow-btn: 0 4px 14px rgba(142, 116, 190, 0.22);
+  --shadow-rose: 0 4px 14px rgba(222, 123, 148, 0.22);
+  --shadow-mint: 0 4px 14px rgba(65, 160, 125, 0.2);
 
   --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -52,19 +109,30 @@
   padding: 0;
 }
 
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-main);
+  /* Patrón sutil y poético de nubes, estrellas y lunas en línea fina de bajísima opacidad */
+  background-image: 
+    radial-gradient(circle at 20% 15%, rgba(222, 123, 148, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(142, 116, 190, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 40% 85%, rgba(90, 158, 196, 0.03) 0%, transparent 45%),
+    url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23BBAFC6' stroke-width='0.75' stroke-linecap='round' stroke-linejoin='round' opacity='0.16'%3E%3C!-- Nube suave --%3E%3Cpath d='M25 40 a7 7 0 0 1 12 -3 a9 9 0 0 1 16 2 a6 6 0 0 1 2 11 l-30 0 a5 5 0 0 1 0 -10' /%3E%3C!-- Pequeña estrella de 4 puntas --%3E%3Cpath d='M85 25 q0 4 4 4 q-4 0 -4 4 q0 -4 -4 -4 q4 0 4 -4' /%3E%3C!-- Lunita --%3E%3Cpath d='M95 85 a6 6 0 1 1 -4 -10 a5 5 0 0 0 4 10' /%3E%3C!-- Destello --%3E%3Ccircle cx='30' cy='95' r='1' /%3E%3Ccircle cx='70' cy='65' r='0.8' /%3E%3C/g%3E%3C/svg%3E");
   color: var(--text-main);
   min-height: 100vh;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar */
+/* Scrollbar Dulce y Redondeada */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-main);
@@ -72,197 +140,234 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: var(--radius-full);
+  border: 2px solid var(--bg-main);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-subtle);
+  background: var(--pastel-lavender-border);
 }
 
-/* Typography Helpers */
+/* Tipografía de Cuento Infantil */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
   font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.02em;
+  color: var(--text-heading);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
 }
 
-/* Buttons */
+p {
+  color: var(--text-main);
+}
+
+/* Botones con estilo Nube de Algodón */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 18px;
-  border-radius: var(--radius-md);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: 0.885rem;
+  font-weight: 700;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all var(--transition-normal);
   text-decoration: none;
+  outline: none;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(142, 116, 190, 0.35);
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none !important;
+  box-shadow: none !important;
 }
 
 .btn:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  background: linear-gradient(135deg, #9D85CC 0%, #866CB4 100%);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-btn);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #8E74BF 0%, #765B9F 100%);
+  box-shadow: 0 6px 18px rgba(142, 116, 190, 0.35);
+  transform: translateY(-2px);
 }
 
 .btn-secondary {
-  background: var(--bg-subtle);
-  border-color: var(--border-color);
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
   color: var(--text-main);
+  box-shadow: var(--shadow-sm);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-card-hover);
-  border-color: var(--text-subtle);
-}
-
-.btn-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-.btn-success:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: var(--bg-subtle);
+  border-color: #DFD5C6;
+  color: var(--text-heading);
   transform: translateY(-1px);
 }
 
+.btn-success {
+  background: linear-gradient(135deg, #48AB85 0%, #379572 100%);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-mint);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3C9A76 0%, #2E8161 100%);
+  box-shadow: 0 6px 18px rgba(65, 160, 125, 0.32);
+  transform: translateY(-2px);
+}
+
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
+  background: linear-gradient(135deg, #D9616D 0%, #C34B57 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(207, 86, 99, 0.2);
 }
 .btn-danger:hover:not(:disabled) {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #C7525E 0%, #AF3C48 100%);
+  transform: translateY(-2px);
 }
 
 .btn-sm {
-  padding: 6px 12px;
-  font-size: 0.775rem;
-  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 0.785rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
 }
 
 .btn-outline-primary {
-  background: transparent;
-  border-color: var(--primary);
-  color: var(--primary);
+  background: var(--pastel-lavender-light);
+  border: 1px solid var(--pastel-lavender-border);
+  color: var(--pastel-lavender);
 }
 .btn-outline-primary:hover:not(:disabled) {
-  background: var(--primary-light);
+  background: #EDE6F8;
+  color: var(--pastel-lavender-hover);
+  border-color: var(--pastel-lavender);
+  transform: translateY(-1px);
 }
 
-/* Card Styles */
+/* Tarjetas Redondeadas tipo Nube */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-md);
-  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+  transition: all var(--transition-normal);
+  position: relative;
 }
 .card:hover {
-  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: var(--shadow-hover);
+  border-color: #E2D7C8;
 }
 
-/* Form inputs */
+/* Formularios Amigables y Accesibles */
 .input, .select, .textarea {
   width: 100%;
-  padding: 10px 14px;
-  background-color: var(--bg-main);
-  border: 1px solid var(--border-color);
+  padding: 11px 16px;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-main);
   font-family: var(--font-sans);
-  font-size: 0.9rem;
+  font-size: 0.925rem;
   transition: all var(--transition-fast);
   outline: none;
 }
+.input::placeholder, .textarea::placeholder {
+  color: var(--text-subtle);
+  opacity: 0.8;
+}
 .input:focus, .select:focus, .textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  border-color: var(--pastel-lavender);
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(142, 116, 190, 0.2);
 }
 .textarea {
-  min-height: 80px;
+  min-height: 84px;
   resize: vertical;
 }
 
-/* Labels */
+/* Etiquetas accesibles */
 .form-label {
   display: block;
+  font-family: var(--font-heading);
   font-size: 0.825rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  margin-bottom: 7px;
+  letter-spacing: 0.02em;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
-/* Badges */
+/* Insignias de Estado con Pasteles Diferenciables */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
+  font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
+/* Estado: Nueva -> Celeste Pastel */
 .badge-nueva {
-  background: var(--info-light);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: var(--pastel-sky-light);
+  color: #3B7E9F;
+  border: 1px solid var(--pastel-sky-border);
 }
 
+/* Estado: Pagada -> Amarillo Mantequilla */
 .badge-pagada {
-  background: var(--warning-light);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: var(--pastel-butter-light);
+  color: #9E7412;
+  border: 1px solid var(--pastel-butter-border);
 }
 
+/* Estado: Enviada -> Lavanda Suave */
 .badge-enviada {
-  background: var(--primary-light);
-  color: #a5b4fc;
-  border: 1px solid rgba(165, 180, 252, 0.3);
+  background: var(--pastel-lavender-light);
+  color: #6C5199;
+  border: 1px solid var(--pastel-lavender-border);
 }
 
+/* Estado: Entregada -> Verde Menta */
 .badge-entregada {
-  background: var(--success-light);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  background: var(--pastel-mint-light);
+  color: #2D7A5C;
+  border: 1px solid var(--pastel-mint-border);
 }
 
+/* Estado: Cancelada -> Frambuesa Suave */
 .badge-cancelada {
-  background: var(--danger-light);
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  background: var(--pastel-berry-light);
+  color: #B03A47;
+  border: 1px solid var(--pastel-berry-border);
 }
 
-/* Layout Utilities */
+/* Utilidades de Maquetación */
 .container {
-  max-width: 1280px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 20px;
 }
 
 .page-header {
@@ -275,35 +380,37 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .page-title {
-  font-size: 1.85rem;
+  font-size: 1.95rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   gap: 12px;
+  color: var(--text-heading);
 }
 
 .page-subtitle {
   color: var(--text-muted);
   font-size: 0.95rem;
-  margin-top: 4px;
+  margin-top: 5px;
+  font-weight: 500;
 }
 
-/* Animations */
+/* Animaciones */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Modal overlay */
+/* Modal con Fondo Suave y Esquinas de Nube */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
+  background-color: rgba(46, 37, 54, 0.45);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -312,35 +419,36 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .modal-content {
-  background: var(--bg-card);
+  background: #FFFFFF;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   max-width: 580px;
   width: 100%;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 20px 50px -10px rgba(70, 50, 80, 0.18);
   overflow: hidden;
-  animation: fadeIn 0.2s ease-out forwards;
+  animation: fadeIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .modal-header {
-  padding: 20px 24px;
+  padding: 20px 26px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--bg-main);
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 26px;
   max-height: 75vh;
   overflow-y: auto;
 }
 
 .modal-footer {
-  padding: 16px 24px;
+  padding: 16px 26px;
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: var(--bg-subtle);
+  background: var(--bg-main);
 }

@@ -3,24 +3,29 @@ import React from 'react';
 export default function MetricCard({ title, value, subtitle, icon: Icon, color = 'primary' }) {
   const colorMap = {
     primary: {
-      bg: 'rgba(99, 102, 241, 0.1)',
-      border: 'rgba(99, 102, 241, 0.25)',
-      icon: '#818cf8',
+      bg: 'var(--pastel-lavender-light)',
+      border: 'rgba(142, 116, 190, 0.25)',
+      icon: 'var(--pastel-lavender-text)',
     },
     success: {
-      bg: 'rgba(16, 185, 129, 0.1)',
-      border: 'rgba(16, 185, 129, 0.25)',
-      icon: '#34d399',
+      bg: 'var(--pastel-mint-light)',
+      border: 'rgba(65, 160, 125, 0.25)',
+      icon: 'var(--pastel-mint-text)',
     },
     warning: {
-      bg: 'rgba(245, 158, 11, 0.1)',
-      border: 'rgba(245, 158, 11, 0.25)',
-      icon: '#fbbf24',
+      bg: 'var(--pastel-butter-light)',
+      border: 'rgba(214, 164, 41, 0.3)',
+      icon: 'var(--pastel-butter-text)',
     },
     info: {
-      bg: 'rgba(14, 165, 233, 0.1)',
-      border: 'rgba(14, 165, 233, 0.25)',
-      icon: '#38bdf8',
+      bg: 'var(--pastel-sky-light)',
+      border: 'rgba(90, 158, 196, 0.25)',
+      icon: 'var(--pastel-sky-text)',
+    },
+    rose: {
+      bg: 'var(--pastel-rose-light)',
+      border: 'rgba(222, 123, 148, 0.25)',
+      icon: 'var(--pastel-rose-text)',
     },
   };
 
@@ -31,19 +36,26 @@ export default function MetricCard({ title, value, subtitle, icon: Icon, color =
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '20px 24px',
+      padding: '22px 24px',
       position: 'relative',
       overflow: 'hidden'
     }}>
       <div>
-        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {title}
         </div>
-        <div style={{ fontSize: '1.9rem', fontWeight: 800, marginTop: 4, letterSpacing: '-0.02em', color: '#ffffff' }}>
+        <div style={{
+          fontFamily: 'var(--font-heading)',
+          fontSize: '1.95rem',
+          fontWeight: 800,
+          marginTop: 4,
+          letterSpacing: '-0.02em',
+          color: 'var(--text-main)'
+        }}>
           {value}
         </div>
         {subtitle && (
-          <div style={{ fontSize: '0.775rem', color: 'var(--text-subtle)', marginTop: 4 }}>
+          <div style={{ fontSize: '0.785rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 500 }}>
             {subtitle}
           </div>
         )}
@@ -51,18 +63,19 @@ export default function MetricCard({ title, value, subtitle, icon: Icon, color =
 
       {Icon && (
         <div style={{
-          width: 52,
-          height: 52,
-          borderRadius: 14,
+          width: 54,
+          height: 54,
+          borderRadius: 18,
           backgroundColor: scheme.bg,
           border: `1px solid ${scheme.border}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: scheme.icon,
-          flexShrink: 0
+          flexShrink: 0,
+          boxShadow: '0 4px 12px rgba(47, 38, 54, 0.04)'
         }}>
-          <Icon size={26} />
+          <Icon size={26} strokeWidth={2.2} />
         </div>
       )}
     </div>

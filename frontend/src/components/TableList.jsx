@@ -56,7 +56,7 @@ export default function TableList({
                   borderBottom: index < data.length - 1 ? '1px solid var(--border-color)' : 'none',
                   transition: 'background-color 0.15s ease'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(142, 116, 190, 0.04)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 {renderRow(item, index)}

@@ -133,7 +133,7 @@ export default function OrdenesPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">
-            <ClipboardList size={28} color="#818cf8" />
+            <ClipboardList size={28} color="var(--primary)" strokeWidth={2.3} />
             Gestión de Órdenes
           </h1>
           <p className="page-subtitle">
@@ -150,7 +150,7 @@ export default function OrdenesPage() {
       <div className="card" style={{ padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Filter size={18} color="var(--text-muted)" />
-          <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Filtrar por estado:</span>
+          <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-main)' }}>Filtrar por estado:</span>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {ESTADOS_FILTRO.map(est => (
@@ -159,9 +159,11 @@ export default function OrdenesPage() {
               onClick={() => setFiltroEstado(est)}
               className="btn btn-sm"
               style={{
-                backgroundColor: filtroEstado === est ? 'var(--primary-light)' : 'var(--bg-subtle)',
-                color: filtroEstado === est ? '#818cf8' : 'var(--text-muted)',
-                borderColor: filtroEstado === est ? 'var(--primary)' : 'var(--border-color)',
+                borderRadius: 9999,
+                backgroundColor: filtroEstado === est ? 'var(--pastel-lavender-light)' : 'var(--bg-subtle)',
+                color: filtroEstado === est ? 'var(--pastel-lavender-text)' : 'var(--text-muted)',
+                borderColor: filtroEstado === est ? 'rgba(142, 116, 190, 0.4)' : 'var(--border-color)',
+                fontWeight: 700,
                 textTransform: 'capitalize'
               }}
             >
@@ -188,17 +190,17 @@ export default function OrdenesPage() {
 
             return (
               <>
-                <td style={{ padding: '14px 20px', fontWeight: 800 }}>#{orden.id}</td>
+                <td style={{ padding: '14px 20px', fontWeight: 800, color: 'var(--text-main)' }}>#{orden.id}</td>
                 <td style={{ padding: '14px 20px', color: 'var(--text-muted)' }}>
                   {orden.fecha ? new Date(orden.fecha).toLocaleDateString('es-CR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                 </td>
-                <td style={{ padding: '14px 20px', fontWeight: 600 }}>
+                <td style={{ padding: '14px 20px', fontWeight: 700, color: 'var(--text-main)' }}>
                   {orden.cliente?.nombre || orden.cliente_nombre || `Cliente #${orden.cliente_id}`}
                 </td>
                 <td style={{ padding: '14px 20px', color: 'var(--text-muted)' }}>
                   {orden.cliente?.ciudad || orden.cliente_ciudad || '-'}
                 </td>
-                <td style={{ padding: '14px 20px', fontWeight: 800, color: 'white' }}>
+                <td style={{ padding: '14px 20px', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)', fontSize: '0.95rem' }}>
                   ${orden.total.toFixed(2)}
                 </td>
                 <td style={{ padding: '14px 20px' }}>
@@ -313,12 +315,12 @@ export default function OrdenesPage() {
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 600 }}>{item.producto_nombre}</div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{item.producto_nombre}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                         ${item.precio_unitario.toFixed(2)} x {item.cantidad} unidad(es)
                       </div>
                     </div>
-                    <div style={{ fontWeight: 700, color: 'white' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--text-main)', fontFamily: 'var(--font-heading)' }}>
                       ${(item.precio_unitario * item.cantidad).toFixed(2)}
                     </div>
                   </div>
@@ -328,8 +330,8 @@ export default function OrdenesPage() {
 
             {/* Resumen financiero */}
             <div style={{
-              backgroundColor: 'var(--bg-main)',
-              padding: '14px 16px',
+              backgroundColor: 'var(--surface-card)',
+              padding: '16px',
               borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-color)',
               display: 'flex',
@@ -339,30 +341,30 @@ export default function OrdenesPage() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Subtotal:</span>
-                <span>${ordenDetalle.subtotal.toFixed(2)}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>${ordenDetalle.subtotal.toFixed(2)}</span>
               </div>
               {ordenDetalle.descuento > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--pastel-mint-text)' }}>
                   <span>Descuento cupón:</span>
-                  <span>-${ordenDetalle.descuento.toFixed(2)}</span>
+                  <span style={{ fontWeight: 700 }}>-${ordenDetalle.descuento.toFixed(2)}</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Costo de envío:</span>
-                <span>${ordenDetalle.envio.toFixed(2)}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>${ordenDetalle.envio.toFixed(2)}</span>
               </div>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 borderTop: '1px solid var(--border-color)',
-                paddingTop: 8,
+                paddingTop: 10,
                 marginTop: 4,
                 fontWeight: 800,
-                fontSize: '1.1rem',
-                color: '#818cf8'
+                fontSize: '1.15rem',
+                color: 'var(--text-main)'
               }}>
                 <span>Total:</span>
-                <span>${ordenDetalle.total.toFixed(2)}</span>
+                <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary)' }}>${ordenDetalle.total.toFixed(2)}</span>
               </div>
             </div>
 

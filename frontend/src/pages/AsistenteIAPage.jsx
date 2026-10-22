@@ -77,7 +77,7 @@ export default function AsistenteIAPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">
-            <Sparkles size={28} color="#c084fc" />
+            <Sparkles size={28} color="var(--primary)" strokeWidth={2.3} />
             Asistente Copilot IA & n8n
           </h1>
           <p className="page-subtitle">
@@ -89,28 +89,32 @@ export default function AsistenteIAPage() {
       {errorMsg && <AlertBox type="error" message={errorMsg} onClose={() => setErrorMsg(null)} />}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 24, borderBottom: '1px solid var(--border-color)', paddingBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 24, borderBottom: '1px solid var(--border-color)', paddingBottom: 12, flexWrap: 'wrap' }}>
         <button
           onClick={() => setTabActiva('descripcion')}
           className="btn"
           style={{
-            backgroundColor: tabActiva === 'descripcion' ? 'var(--primary-light)' : 'transparent',
-            color: tabActiva === 'descripcion' ? '#818cf8' : 'var(--text-muted)',
-            borderColor: tabActiva === 'descripcion' ? 'var(--primary)' : 'transparent'
+            borderRadius: 9999,
+            backgroundColor: tabActiva === 'descripcion' ? 'var(--pastel-lavender-light)' : 'var(--bg-subtle)',
+            color: tabActiva === 'descripcion' ? 'var(--pastel-lavender-text)' : 'var(--text-muted)',
+            borderColor: tabActiva === 'descripcion' ? 'rgba(142, 116, 190, 0.4)' : 'var(--border-color)',
+            fontWeight: 700
           }}
         >
-          <Bot size={16} /> 1. Generador de Descripción Comercial
+          <Bot size={16} strokeWidth={2.2} /> 1. Generador de Descripción Comercial
         </button>
         <button
           onClick={() => setTabActiva('recomendador')}
           className="btn"
           style={{
-            backgroundColor: tabActiva === 'recomendador' ? 'var(--primary-light)' : 'transparent',
-            color: tabActiva === 'recomendador' ? '#818cf8' : 'var(--text-muted)',
-            borderColor: tabActiva === 'recomendador' ? 'var(--primary)' : 'transparent'
+            borderRadius: 9999,
+            backgroundColor: tabActiva === 'recomendador' ? 'var(--pastel-lavender-light)' : 'var(--bg-subtle)',
+            color: tabActiva === 'recomendador' ? 'var(--pastel-lavender-text)' : 'var(--text-muted)',
+            borderColor: tabActiva === 'recomendador' ? 'rgba(142, 116, 190, 0.4)' : 'var(--border-color)',
+            fontWeight: 700
           }}
         >
-          <ShoppingBag size={16} /> 2. Recomendador de Carrito de Juguetes
+          <ShoppingBag size={16} strokeWidth={2.2} /> 2. Recomendador de Carrito de Juguetes
         </button>
       </div>
 
@@ -174,7 +178,7 @@ export default function AsistenteIAPage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Cpu size={20} color="#34d399" />
+                  <Cpu size={20} color="var(--pastel-mint-text)" strokeWidth={2.2} />
                   Respuesta del Agente de IA
                 </h3>
                 {resultadoDesc?.data?.fuente && (
@@ -187,13 +191,13 @@ export default function AsistenteIAPage() {
               {resultadoDesc ? (
                 <div>
                   <div style={{
-                    backgroundColor: 'var(--bg-subtle)',
-                    padding: '18px',
+                    backgroundColor: 'var(--pastel-butter-light)',
+                    padding: '18px 20px',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-color)',
+                    border: '1px solid rgba(214, 164, 41, 0.25)',
                     fontSize: '0.95rem',
                     lineHeight: 1.6,
-                    color: 'white',
+                    color: 'var(--text-main)',
                     marginBottom: 16
                   }}>
                     {resultadoDesc.data?.descripcion_generada}
@@ -203,7 +207,7 @@ export default function AsistenteIAPage() {
                     onClick={() => handleCopiarTexto(resultadoDesc.data?.descripcion_generada)}
                     className="btn btn-secondary btn-sm"
                   >
-                    {copiadoDesc ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
+                    {copiadoDesc ? <Check size={14} color="var(--pastel-mint-text)" /> : <Copy size={14} />}
                     {copiadoDesc ? '¡Copiado al portapapeles!' : 'Copiar Descripción'}
                   </button>
                 </div>
@@ -224,11 +228,12 @@ export default function AsistenteIAPage() {
                   <Code size={12} /> Contrato de Respuesta: &#123; ok: true, data: ..., error: null &#125;
                 </div>
                 <pre style={{
-                  backgroundColor: 'var(--bg-main)',
-                  padding: 10,
-                  borderRadius: 6,
+                  backgroundColor: 'var(--bg-subtle)',
+                  padding: 12,
+                  borderRadius: 10,
                   fontSize: '0.75rem',
-                  color: '#a5b4fc',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-color)',
                   overflowX: 'auto',
                   fontFamily: 'var(--font-mono)'
                 }}>
@@ -297,7 +302,7 @@ export default function AsistenteIAPage() {
                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.nombre}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.motivo}</div>
                     </div>
-                    <div style={{ fontWeight: 800, color: 'var(--success)', fontSize: '0.9rem' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--pastel-mint-text)', fontFamily: 'var(--font-heading)', fontSize: '0.95rem' }}>
                       ${item.precio.toFixed(2)}
                     </div>
                   </div>
@@ -305,11 +310,12 @@ export default function AsistenteIAPage() {
 
                 <div style={{ marginTop: 14, borderTop: '1px solid var(--border-color)', paddingTop: 10 }}>
                   <pre style={{
-                    backgroundColor: 'var(--bg-main)',
-                    padding: 8,
-                    borderRadius: 6,
+                    backgroundColor: 'var(--bg-subtle)',
+                    padding: 10,
+                    borderRadius: 10,
                     fontSize: '0.725rem',
-                    color: '#a5b4fc',
+                    color: 'var(--text-main)',
+                    border: '1px solid var(--border-color)',
                     overflowX: 'auto',
                     fontFamily: 'var(--font-mono)'
                   }}>

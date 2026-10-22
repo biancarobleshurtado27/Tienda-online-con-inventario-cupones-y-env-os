@@ -21,7 +21,9 @@ import {
   Edit3, 
   Trash2, 
   Sparkles, 
-  AlertCircle
+  AlertCircle,
+  Check,
+  Circle
 } from 'lucide-react';
 
 const CATEGORIAS = [
@@ -233,7 +235,7 @@ export default function ProductosPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">
-            <Package size={28} color="#818cf8" />
+            <Package size={28} color="var(--primary)" strokeWidth={2.3} />
             Catálogo de Juguetes
           </h1>
           <p className="page-subtitle">
@@ -341,29 +343,28 @@ export default function ProductosPage() {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                padding: '20px',
+                padding: '22px',
                 position: 'relative',
               }}
             >
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
                   <span style={{
-                    fontSize: '0.725rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontWeight: 700,
-                    padding: '3px 8px',
-                    borderRadius: 6,
-                    backgroundColor: 'var(--bg-subtle)',
-                    color: '#818cf8',
-                    border: '1px solid var(--border-color)'
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.03em',
+                    fontWeight: 800,
+                    padding: '3px 10px',
+                    borderRadius: 9999,
+                    backgroundColor: 'var(--pastel-lavender-light)',
+                    color: 'var(--pastel-lavender-text)',
+                    border: '1px solid rgba(142, 116, 190, 0.25)'
                   }}>
                     {prod.categoria}
                   </span>
                   <span style={{
                     fontSize: '0.75rem',
                     fontWeight: 700,
-                    color: prod.stock > 5 ? 'var(--success)' : (prod.stock > 0 ? 'var(--warning)' : 'var(--danger)'),
+                    color: prod.stock > 5 ? 'var(--pastel-mint-text)' : (prod.stock > 0 ? 'var(--pastel-butter-text)' : 'var(--pastel-rose-text)'),
                     display: 'flex',
                     alignItems: 'center',
                     gap: 4
@@ -372,19 +373,26 @@ export default function ProductosPage() {
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 8, lineHeight: 1.3 }}>
+                <h3 style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  marginBottom: 8,
+                  lineHeight: 1.35,
+                  color: 'var(--text-main)'
+                }}>
                   {prod.nombre}
                 </h3>
 
                 <p style={{
-                  fontSize: '0.825rem',
+                  fontSize: '0.84rem',
                   color: 'var(--text-muted)',
                   marginBottom: 16,
                   display: '-webkit-box',
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
-                  lineHeight: 1.45
+                  lineHeight: 1.5
                 }}>
                   {prod.descripcion || 'Sin descripción comercial registrada.'}
                 </p>
@@ -395,15 +403,28 @@ export default function ProductosPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  paddingTop: 12,
+                  paddingTop: 14,
                   borderTop: '1px solid var(--border-color)',
-                  marginBottom: 12
+                  marginBottom: 14
                 }}>
-                  <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'white' }}>
+                  <div style={{
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: '1.45rem',
+                    fontWeight: 800,
+                    color: 'var(--text-main)'
+                  }}>
                     ${prod.precio.toFixed(2)}
                   </div>
-                  <div style={{ fontSize: '0.725rem', color: prod.activo ? 'var(--success)' : 'var(--text-subtle)' }}>
-                    {prod.activo ? '● Activo para venta' : '○ Inactivo'}
+                  <div style={{ fontSize: '0.75rem' }}>
+                    {prod.activo ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--pastel-mint-text)', fontWeight: 700 }}>
+                        <Check size={13} strokeWidth={2.5} /> Activo
+                      </span>
+                    ) : (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text-subtle)', fontWeight: 600 }}>
+                        <Circle size={11} strokeWidth={2} /> Inactivo
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -413,14 +434,15 @@ export default function ProductosPage() {
                     className="btn btn-secondary btn-sm"
                     style={{ flex: 1 }}
                   >
-                    <Edit3 size={15} /> Editar
+                    <Edit3 size={15} strokeWidth={2} /> Editar
                   </button>
                   <button 
                     onClick={() => setProductoAEliminar(prod)}
                     className="btn btn-danger btn-sm"
                     title="Eliminar producto"
+                    aria-label={`Eliminar ${prod.nombre}`}
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={15} strokeWidth={2} />
                   </button>
                 </div>
               </div>

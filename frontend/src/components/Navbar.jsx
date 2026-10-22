@@ -21,11 +21,12 @@ export default function Navbar() {
   return (
     <header style={{
       borderBottom: '1px solid var(--border-color)',
-      backgroundColor: 'rgba(17, 24, 39, 0.95)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(255, 255, 255, 0.92)',
+      backdropFilter: 'blur(12px)',
       position: 'sticky',
       top: 0,
-      zIndex: 50
+      zIndex: 50,
+      boxShadow: '0 2px 12px rgba(47, 38, 54, 0.03)'
     }}>
       <div className="container" style={{
         paddingTop: 12,
@@ -44,26 +45,48 @@ export default function Navbar() {
             alignItems: 'center', 
             gap: 12, 
             textDecoration: 'none',
-            color: 'white'
+            color: 'var(--text-main)'
           }}
         >
           <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+            width: 42,
+            height: 42,
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, var(--pastel-rose) 0%, var(--pastel-lavender) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)'
+            boxShadow: '0 6px 16px rgba(222, 123, 148, 0.25)',
+            flexShrink: 0
           }}>
-            <Store size={22} color="white" />
+            <Store size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 6 }}>
-              Mundo Juguete <span style={{ color: 'var(--primary)', fontSize: '0.85rem' }}>PRO</span>
+            <div style={{
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 800,
+              fontSize: '1.2rem',
+              letterSpacing: '-0.01em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              color: 'var(--text-main)'
+            }}>
+              Mundo Juguete
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                letterSpacing: '0.04em',
+                padding: '2px 8px',
+                borderRadius: 9999,
+                backgroundColor: 'var(--pastel-butter-light)',
+                color: 'var(--pastel-butter-text)',
+                border: '1px solid rgba(214, 164, 41, 0.3)'
+              }}>
+                PRO
+              </span>
             </div>
-            <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.725rem', color: 'var(--text-subtle)', fontWeight: 500 }}>
               Juguetería Online · Laboratorio #2
             </div>
           </div>
@@ -82,28 +105,30 @@ export default function Navbar() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '8px 14px',
-                  borderRadius: 'var(--radius-md)',
+                  padding: '8px 16px',
+                  borderRadius: 9999,
                   textDecoration: 'none',
                   fontSize: '0.875rem',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   transition: 'all var(--transition-fast)',
-                  backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
-                  color: isActive ? '#818cf8' : 'var(--text-muted)',
-                  border: isActive ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
+                  backgroundColor: isActive ? 'var(--pastel-lavender-light)' : 'transparent',
+                  color: isActive ? 'var(--pastel-lavender-text)' : 'var(--text-muted)',
+                  border: isActive ? '1px solid rgba(142, 116, 190, 0.25)' : '1px solid transparent',
+                  boxShadow: isActive ? '0 2px 8px rgba(142, 116, 190, 0.12)' : 'none'
                 })}
               >
-                <Icon size={18} />
+                <Icon size={17} strokeWidth={2.2} />
                 <span>{item.label}</span>
                 {item.badge && (
                   <span style={{
                     fontSize: '0.65rem',
-                    padding: '2px 6px',
-                    borderRadius: 999,
-                    backgroundColor: 'rgba(168, 85, 247, 0.2)',
-                    color: '#c084fc',
-                    border: '1px solid rgba(168, 85, 247, 0.3)',
-                    fontWeight: 700
+                    padding: '2px 8px',
+                    borderRadius: 9999,
+                    backgroundColor: 'var(--pastel-rose-light)',
+                    color: 'var(--pastel-rose-text)',
+                    border: '1px solid rgba(222, 123, 148, 0.25)',
+                    fontWeight: 800,
+                    letterSpacing: '0.02em'
                   }}>
                     {item.badge}
                   </span>
@@ -114,16 +139,27 @@ export default function Navbar() {
         </nav>
 
         {/* Server status indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          fontSize: '0.75rem',
+          color: 'var(--text-subtle)',
+          backgroundColor: 'var(--surface-card)',
+          padding: '6px 12px',
+          borderRadius: 9999,
+          border: '1px solid var(--border-color)',
+          fontWeight: 600
+        }}>
           <span style={{
             width: 8,
             height: 8,
             borderRadius: '50%',
-            backgroundColor: 'var(--success)',
-            boxShadow: '0 0 8px var(--success)',
+            backgroundColor: 'var(--pastel-mint)',
+            boxShadow: '0 0 6px rgba(65, 160, 125, 0.4)',
             display: 'inline-block'
           }}></span>
-          <span>API :3001 OK</span>
+          <span>API :3001 Conectada</span>
         </div>
       </div>
     </header>

@@ -54,7 +54,7 @@ export default function DashboardPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">
-            <TrendingUp size={28} color="#818cf8" />
+            <TrendingUp size={28} color="var(--primary)" strokeWidth={2.3} />
             Panel de Métricas y Analítica
           </h1>
           <p className="page-subtitle">
@@ -62,7 +62,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <button onClick={refetch} className="btn btn-secondary btn-sm">
-          <RefreshCw size={16} /> Actualizar Datos
+          <RefreshCw size={15} strokeWidth={2.2} /> Actualizar Datos
         </button>
       </div>
 
@@ -113,7 +113,7 @@ export default function DashboardPage() {
         {/* Ventas por Categoría */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <Layers size={22} color="var(--primary)" />
+            <Layers size={22} color="var(--primary)" strokeWidth={2.2} />
             <h3 style={{ fontSize: '1.15rem' }}>Ventas por Categoría</h3>
           </div>
 
@@ -123,23 +123,23 @@ export default function DashboardPage() {
               return (
                 <div key={cat.categoria}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', marginBottom: 6 }}>
-                    <span style={{ fontWeight: 600 }}>{cat.categoria}</span>
+                    <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{cat.categoria}</span>
                     <span style={{ color: 'var(--text-muted)' }}>
                       ${cat.total_ventas.toFixed(2)} ({cat.unidades_vendidas} uds) · <strong>{porcentaje}%</strong>
                     </span>
                   </div>
                   <div style={{
                     width: '100%',
-                    height: 8,
+                    height: 9,
                     backgroundColor: 'var(--bg-subtle)',
-                    borderRadius: 999,
+                    borderRadius: 9999,
                     overflow: 'hidden'
                   }}>
                     <div style={{
                       width: `${porcentaje}%`,
                       height: '100%',
-                      background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)',
-                      borderRadius: 999,
+                      background: 'linear-gradient(90deg, var(--pastel-rose) 0%, var(--pastel-lavender) 100%)',
+                      borderRadius: 9999,
                       transition: 'width 0.6s ease-in-out'
                     }}></div>
                   </div>
@@ -155,13 +155,19 @@ export default function DashboardPage() {
         {/* Top 3 Productos más vendidos */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <Award size={22} color="#f59e0b" />
+            <Award size={22} color="var(--pastel-butter-text)" strokeWidth={2.2} />
             <h3 style={{ fontSize: '1.15rem' }}>Top 3 Productos Más Vendidos</h3>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {top_3_productos_mas_vendidos.map((prod, index) => {
-              const medallas = ['🥇', '🥈', '🥉'];
+              const rankStyles = [
+                { bg: 'var(--pastel-butter-light)', text: 'var(--pastel-butter-text)', border: 'rgba(214, 164, 41, 0.3)' },
+                { bg: 'var(--pastel-lavender-light)', text: 'var(--pastel-lavender-text)', border: 'rgba(142, 116, 190, 0.3)' },
+                { bg: 'var(--pastel-rose-light)', text: 'var(--pastel-rose-text)', border: 'rgba(222, 123, 148, 0.3)' }
+              ];
+              const currentRank = rankStyles[index] || rankStyles[2];
+
               return (
                 <div
                   key={prod.id}
@@ -175,15 +181,31 @@ export default function DashboardPage() {
                     border: '1px solid var(--border-color)'
                   }}
                 >
-                  <div style={{ fontSize: '1.6rem' }}>{medallas[index] || '⭐'}</div>
+                  <div style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 9999,
+                    backgroundColor: currentRank.bg,
+                    border: `1px solid ${currentRank.border}`,
+                    color: currentRank.text,
+                    fontFamily: 'var(--font-heading)',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    #{index + 1}
+                  </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.925rem' }}>{prod.nombre}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.925rem', color: 'var(--text-main)' }}>{prod.nombre}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Categoría: {prod.categoria} · Stock actual: {prod.stock} uds
+                      Categoría: {prod.categoria} · Stock: {prod.stock} uds
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 800, color: 'var(--success)', fontSize: '0.95rem' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--pastel-mint-text)', fontSize: '0.95rem' }}>
                       {prod.total_vendido} vendidos
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
@@ -217,7 +239,7 @@ export default function DashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
-                  padding: '10px 16px',
+                  padding: '12px 18px',
                   backgroundColor: 'var(--bg-subtle)',
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border-color)',
@@ -225,7 +247,13 @@ export default function DashboardPage() {
                 }}
               >
                 <StatusBadge estado={item.estado} />
-                <span style={{ fontWeight: 800, fontSize: '1.1rem', marginLeft: 'auto' }}>
+                <span style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: 800,
+                  fontSize: '1.2rem',
+                  marginLeft: 'auto',
+                  color: 'var(--text-main)'
+                }}>
                   {item.cantidad}
                 </span>
               </div>
@@ -234,16 +262,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Reto extra: Alertas de Reposición */}
-        <div className="card" style={{ borderColor: 'rgba(245, 158, 11, 0.3)' }}>
+        <div className="card" style={{ borderColor: 'rgba(214, 164, 41, 0.35)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <AlertTriangle size={22} color="#fbbf24" />
-            <h3 style={{ fontSize: '1.1rem', color: '#fbbf24' }}>
+            <AlertTriangle size={22} color="var(--pastel-butter-text)" strokeWidth={2.2} />
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--pastel-butter-text)' }}>
               Alertas de Reposición (Stock Crítico)
             </h3>
           </div>
 
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 14 }}>
-            Productos con inventario bajo (&le; 5 unidades) que requieren reabastecimiento inmediato.
+            Juguetes con inventario bajo (&le; 5 unidades) que requieren reabastecimiento en el almacén.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -254,20 +282,21 @@ export default function DashboardPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '8px 12px',
+                  padding: '10px 14px',
                   borderRadius: 'var(--radius-sm)',
-                  backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                  border: '1px solid rgba(245, 158, 11, 0.2)',
+                  backgroundColor: 'var(--pastel-butter-light)',
+                  border: '1px solid rgba(214, 164, 41, 0.25)',
                   fontSize: '0.85rem'
                 }}
               >
-                <span style={{ fontWeight: 600 }}>{item.nombre}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{item.nombre}</span>
                 <span style={{
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  padding: '2px 8px',
-                  borderRadius: 999,
-                  fontWeight: 700,
+                  backgroundColor: 'var(--pastel-rose-light)',
+                  color: 'var(--pastel-rose-text)',
+                  border: '1px solid rgba(222, 123, 148, 0.3)',
+                  padding: '3px 10px',
+                  borderRadius: 9999,
+                  fontWeight: 800,
                   fontSize: '0.75rem'
                 }}>
                   {item.stock} disponibles
@@ -275,9 +304,21 @@ export default function DashboardPage() {
               </div>
             ))}
             {alertas_reposicion_stock.length === 0 && (
-              <p style={{ color: 'var(--success)', fontSize: '0.85rem' }}>
-                🎉 Todo el inventario se encuentra en niveles óptimos.
-              </p>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'var(--pastel-mint-light)',
+                border: '1px solid rgba(65, 160, 125, 0.25)',
+                color: 'var(--pastel-mint-text)',
+                fontSize: '0.85rem',
+                fontWeight: 600
+              }}>
+                <Award size={18} strokeWidth={2.2} />
+                <span>Todo el inventario se encuentra en niveles óptimos.</span>
+              </div>
             )}
           </div>
         </div>

@@ -277,7 +277,7 @@ export default function NuevaOrdenPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">
-            <ShoppingCart size={28} color="#818cf8" />
+            <ShoppingCart size={28} color="var(--primary)" strokeWidth={2.3} />
             Nueva Orden de Venta
           </h1>
           <p className="page-subtitle">
@@ -502,21 +502,22 @@ export default function NuevaOrdenPage() {
                         style={{
                           padding: '10px 12px',
                           borderRadius: 'var(--radius-sm)',
-                          backgroundColor: 'rgba(99, 102, 241, 0.08)',
-                          border: '1px solid rgba(99, 102, 241, 0.2)',
+                          backgroundColor: 'var(--pastel-lavender-light)',
+                          border: '1px solid rgba(142, 116, 190, 0.25)',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: 4
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{rec.nombre}</span>
-                          <span style={{ fontWeight: 700, color: 'var(--success)', fontSize: '0.85rem' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>{rec.nombre}</span>
+                          <span style={{ fontWeight: 800, color: 'var(--pastel-mint-text)', fontSize: '0.85rem' }}>
                             ${Number(rec.precio).toFixed(2)}
                           </span>
                         </div>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.35 }}>
-                          💡 <strong>Motivo:</strong> {rec.motivo || 'Juguete complementario ideal para disfrutar juntos.'}
+                          <Sparkles size={12} strokeWidth={2.2} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4, color: 'var(--pastel-lavender-text)' }} />
+                          <strong>Motivo:</strong> {rec.motivo || 'Juguete complementario ideal para disfrutar juntos.'}
                         </p>
                         <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end' }}>
                           <button
@@ -551,17 +552,17 @@ export default function NuevaOrdenPage() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '8px 12px',
-                  backgroundColor: 'var(--success-light)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  backgroundColor: 'var(--pastel-mint-light)',
+                  border: '1px solid rgba(65, 160, 125, 0.3)',
                   borderRadius: 'var(--radius-sm)',
-                  color: '#34d399'
+                  color: 'var(--pastel-mint-text)'
                 }}>
                   <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>
                     {cuponAplicado.codigo} (-{cuponAplicado.porcentaje}%)
                   </span>
                   <button
                     onClick={handleQuitarCupon}
-                    style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--pastel-rose-text)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}
                   >
                     Remover
                   </button>
@@ -590,7 +591,7 @@ export default function NuevaOrdenPage() {
 
             {/* Desglose de Totales */}
             <div style={{
-              backgroundColor: 'var(--bg-main)',
+              backgroundColor: 'var(--surface-card)',
               borderRadius: 'var(--radius-md)',
               padding: '16px',
               border: '1px solid var(--border-color)',
@@ -601,13 +602,13 @@ export default function NuevaOrdenPage() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                 <span>Subtotal:</span>
-                <span style={{ fontWeight: 600, color: 'white' }}>${subtotal.toFixed(2)}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>${subtotal.toFixed(2)}</span>
               </div>
 
               {descuento > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--pastel-mint-text)' }}>
                   <span>Descuento ({cuponAplicado.porcentaje}%):</span>
-                  <span style={{ fontWeight: 600 }}>-${descuento.toFixed(2)}</span>
+                  <span style={{ fontWeight: 700 }}>-${descuento.toFixed(2)}</span>
                 </div>
               )}
 
@@ -615,8 +616,8 @@ export default function NuevaOrdenPage() {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <Truck size={14} /> Envío {clienteSeleccionado ? `(${clienteSeleccionado.ciudad})` : ''}:
                 </span>
-                <span style={{ fontWeight: 600, color: costoEnvio === 0 ? 'var(--success)' : 'white' }}>
-                  {costoEnvio === 0 ? 'GRATIS (Supera $100)' : `$${costoEnvio.toFixed(2)}`}
+                <span style={{ fontWeight: 700, color: costoEnvio === 0 ? 'var(--pastel-mint-text)' : 'var(--text-main)' }}>
+                  {costoEnvio === 0 ? 'GRATIS (Supera $50)' : `$${costoEnvio.toFixed(2)}`}
                 </span>
               </div>
 
@@ -628,10 +629,10 @@ export default function NuevaOrdenPage() {
                 marginTop: 6,
                 fontSize: '1.25rem',
                 fontWeight: 800,
-                color: 'white'
+                color: 'var(--text-main)'
               }}>
                 <span>Total a Pagar:</span>
-                <span style={{ color: '#818cf8' }}>${total.toFixed(2)}</span>
+                <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary)' }}>${total.toFixed(2)}</span>
               </div>
             </div>
 
