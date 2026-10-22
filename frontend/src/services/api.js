@@ -1,0 +1,160 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+/**
+ * Función genérica de petición HTTP con manejo consistente de errores { error: "..." }
+ */
+async function request(endpoint, options = {}) {
+  const url = `${API_URL}${endpoint}`;
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errorMsg = data?.error || `Error ${response.status}: ${response.statusText}`;
+      const error = new Error(errorMsg);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    if (err.status) {
+      throw err;
+    }
+    // Errores de red / conexión rechazada
+    const netError = new Error('No se pudo conectar con el servidor backend en http://localhost:3001. Verifica que el servidor esté activo.');
+    netError.status = 503;
+    throw netError;
+  }
+}
+
+// -------------------------------------------------------------
+// Productos
+// -------------------------------------------------------------
+export async function getProductos(params = {}) {
+  const query = new URLSearchParams();
+  if (params.categoria) query.append('categoria', params.categoria);
+  if (params.busqueda) query.append('busqueda', params.busqueda);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  return request(`/productos${qs}`);
+}
+
+export async function getProductoById(id) {
+  return request(`/productos/${id}`);
+}
+
+export async function createProducto(productoData) {
+  return request('/productos', {
+    method: 'POST',
+    body: JSON.stringify(productoData),
+  });
+}
+
+export async function updateProducto(id, productoData) {
+  return request(`/productos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(productoData),
+  });
+}
+
+export async function deleteProducto(id) {
+  return request(`/productos/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// -------------------------------------------------------------
+// Clientes
+// -------------------------------------------------------------
+export async function getClientes() {
+  return request('/clientes');
+}
+
+export async function createCliente(clienteData) {
+  return request('/clientes', {
+    method: 'POST',
+    body: JSON.stringify(clienteData),
+  });
+}
+
+// -------------------------------------------------------------
+// Cupones
+// -------------------------------------------------------------
+export async function getCupones() {
+  return request('/cupones');
+}
+
+export async function validarCupon(codigo, cliente_id) {
+  return request('/cupones/validar', {
+    method: 'POST',
+    body: JSON.stringify({ codigo, cliente_id }),
+  });
+}
+
+// -------------------------------------------------------------
+// Órdenes
+// -------------------------------------------------------------
+export async function getOrdenes(params = {}) {
+  const query = new URLSearchParams();
+  if (params.estado) query.append('estado', params.estado);
+  if (params.cliente_id) query.append('cliente_id', params.cliente_id);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  return request(`/ordenes${qs}`);
+}
+
+export async function getOrdenById(id) {
+  return request(`/ordenes/${id}`);
+}
+
+export async function createOrden(ordenData) {
+  return request('/ordenes', {
+    method: 'POST',
+    body: JSON.stringify(ordenData),
+  });
+}
+
+export async function updateEstadoOrden(id, nuevoEstado) {
+  return request(`/ordenes/${id}/estado`, {
+    method: 'PATCH',
+    body: JSON.stringify({ estado: nuevoEstado }),
+  });
+}
+
+export async function cancelarOrden(id) {
+  return request(`/ordenes/${id}/cancelar`, {
+    method: 'PATCH',
+  });
+}
+
+// -------------------------------------------------------------
+// Métricas y Resumen
+// -------------------------------------------------------------
+export async function getResumen() {
+  return request('/resumen');
+}
+
+// -------------------------------------------------------------
+// Asistente IA (n8n Webhook / Copilot)
+// -------------------------------------------------------------
+export async function generarDescripcionIA(nombre, categoria) {
+  return request('/ia/generar-descripcion', {
+    method: 'POST',
+    body: JSON.stringify({ nombre, categoria }),
+  });
+}
+
+export async function recomendarCarritoIA(productoIds) {
+  return request('/ia/recomendar-carrito', {
+    method: 'POST',
+    body: JSON.stringify({ producto_ids: productoIds }),
+  });
+}

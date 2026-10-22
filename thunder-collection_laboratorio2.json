@@ -1,0 +1,225 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Laboratorio 2 - Caso 5 Tienda Online",
+  "collectionId": "lab2-caso5-tienda",
+  "dateExported": "2026-10-21T12:00:00.000Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "id": "f-productos",
+      "name": "1. Productos (CRUD & Filtros)",
+      "containerId": ""
+    },
+    {
+      "id": "f-cupones",
+      "name": "2. Cupones (Validaciones 409)",
+      "containerId": ""
+    },
+    {
+      "id": "f-clientes",
+      "name": "3. Clientes",
+      "containerId": ""
+    },
+    {
+      "id": "f-ordenes",
+      "name": "4. Órdenes (Transacciones & Flujo de Estados)",
+      "containerId": ""
+    },
+    {
+      "id": "f-metricas",
+      "name": "5. Métricas (/api/resumen)",
+      "containerId": ""
+    },
+    {
+      "id": "f-ia",
+      "name": "6. Agente IA (Contrato { ok, data, error })",
+      "containerId": ""
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req-prod-list",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-productos",
+      "name": "GET Todos los productos (200)",
+      "url": "http://localhost:3001/api/productos",
+      "method": "GET"
+    },
+    {
+      "_id": "req-prod-filter",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-productos",
+      "name": "GET Productos con filtro de categoría (200)",
+      "url": "http://localhost:3001/api/productos?categoria=Periféricos",
+      "method": "GET"
+    },
+    {
+      "_id": "req-prod-detail",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-productos",
+      "name": "GET Producto por ID (200)",
+      "url": "http://localhost:3001/api/productos/1",
+      "method": "GET"
+    },
+    {
+      "_id": "req-prod-404",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-productos",
+      "name": "GET Producto no existente (404)",
+      "url": "http://localhost:3001/api/productos/9999",
+      "method": "GET"
+    },
+    {
+      "_id": "req-prod-create-ok",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-productos",
+      "name": "POST Crear Producto válido (201)",
+      "url": "http://localhost:3001/api/productos",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"nombre\": \"Mousepad Gamer XL\",\n  \"descripcion\": \"Superficie de microfibra impermeable 900x400mm\",\n  \"precio\": 22.50,\n  \"stock\": 25,\n  \"categoria\": \"Accesorios\"\n}"
+      }
+    },
+    {
+      "_id": "req-prod-create-400",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-productos",
+      "name": "POST Crear Producto datos inválidos (400)",
+      "url": "http://localhost:3001/api/productos",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"nombre\": \"\",\n  \"precio\": -15.00,\n  \"stock\": -5,\n  \"categoria\": \"\"\n}"
+      }
+    },
+    {
+      "_id": "req-cupon-list",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-cupones",
+      "name": "GET Listar Cupones con usos (200)",
+      "url": "http://localhost:3001/api/cupones",
+      "method": "GET"
+    },
+    {
+      "_id": "req-cupon-val-ok",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-cupones",
+      "name": "POST Validar Cupón Válido (200)",
+      "url": "http://localhost:3001/api/cupones/validar",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"codigo\": \"BIENVENIDO10\",\n  \"cliente_id\": 2\n}"
+      }
+    },
+    {
+      "_id": "req-cupon-val-vencido-409",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-cupones",
+      "name": "POST Validar Cupón Vencido (409 Conflicto)",
+      "url": "http://localhost:3001/api/cupones/validar",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"codigo\": \"VENCIDO15\",\n  \"cliente_id\": 1\n}"
+      }
+    },
+    {
+      "_id": "req-clientes-list",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-clientes",
+      "name": "GET Listar Clientes (200)",
+      "url": "http://localhost:3001/api/clientes",
+      "method": "GET"
+    },
+    {
+      "_id": "req-resumen-metricas",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-metricas",
+      "name": "GET Métricas Dashboard (/api/resumen) (200)",
+      "url": "http://localhost:3001/api/resumen",
+      "method": "GET"
+    },
+    {
+      "_id": "req-orden-list",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ordenes",
+      "name": "GET Listar Órdenes (200)",
+      "url": "http://localhost:3001/api/ordenes",
+      "method": "GET"
+    },
+    {
+      "_id": "req-orden-detail-rel",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ordenes",
+      "name": "GET Detalle de Orden con datos relacionados (200)",
+      "url": "http://localhost:3001/api/ordenes/1",
+      "method": "GET"
+    },
+    {
+      "_id": "req-orden-stock-insuficiente-409",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ordenes",
+      "name": "POST Crear Orden stock insuficiente (409 Conflicto)",
+      "url": "http://localhost:3001/api/ordenes",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"cliente_id\": 1,\n  \"items\": [\n    {\n      \"producto_id\": 1,\n      \"cantidad\": 9999\n    }\n  ]\n}"
+      }
+    },
+    {
+      "_id": "req-orden-create-ok",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ordenes",
+      "name": "POST Crear Orden con cupón y cálculo de envío (201)",
+      "url": "http://localhost:3001/api/ordenes",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"cliente_id\": 2,\n  \"cupon_codigo\": \"BIENVENIDO10\",\n  \"items\": [\n    {\n      \"producto_id\": 2,\n      \"cantidad\": 1\n    }\n  ]\n}"
+      }
+    },
+    {
+      "_id": "req-orden-cancelar-ok",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ordenes",
+      "name": "PATCH Cancelar Orden y reponer stock (200)",
+      "url": "http://localhost:3001/api/ordenes/3/cancelar",
+      "method": "PATCH"
+    },
+    {
+      "_id": "req-orden-cancelar-invalida-409",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ordenes",
+      "name": "PATCH Cancelar Orden entregada rechaza (409 Conflicto)",
+      "url": "http://localhost:3001/api/ordenes/2/cancelar",
+      "method": "PATCH"
+    },
+    {
+      "_id": "req-ia-desc",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ia",
+      "name": "POST Asistente IA - Descripción comercial (200)",
+      "url": "http://localhost:3001/api/ia/generar-descripcion",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"nombre\": \"Hub USB-C 7 en 1 con HDMI 4K\",\n  \"categoria\": \"Accesorios\"\n}"
+      }
+    },
+    {
+      "_id": "req-ia-recom",
+      "colId": "lab2-caso5-tienda",
+      "containerId": "f-ia",
+      "name": "POST Asistente IA - Recomendaciones para carrito (200)",
+      "url": "http://localhost:3001/api/ia/recomendar-carrito",
+      "method": "POST",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"producto_ids\": [1, 2]\n}"
+      }
+    }
+  ]
+}
