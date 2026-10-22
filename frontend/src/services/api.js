@@ -2,6 +2,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 /**
  * Función genérica de petición HTTP con manejo consistente de errores { error: "..." }
+ * Captura códigos 400, 404, 409 y despliega el mensaje exacto enviado por la API.
  */
 async function request(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
@@ -31,7 +32,7 @@ async function request(endpoint, options = {}) {
       throw err;
     }
     // Errores de red / conexión rechazada
-    const netError = new Error('No se pudo conectar con el servidor backend en http://localhost:3001. Verifica que el servidor esté activo.');
+    const netError = new Error('No se pudo conectar con el servidor backend en http://localhost:3001. Verifica que el servidor de Express esté ejecutándose.');
     netError.status = 503;
     throw netError;
   }
@@ -42,10 +43,20 @@ async function request(endpoint, options = {}) {
 // -------------------------------------------------------------
 export async function getProductos(params = {}) {
   const query = new URLSearchParams();
-  if (params.categoria) query.append('categoria', params.categoria);
-  if (params.busqueda) query.append('busqueda', params.busqueda);
+  if (params.categoria && params.categoria !== 'Todas') query.append('categoria', params.categoria);
+  const search = params.search || params.busqueda;
+  if (search) query.append('search', search);
+  if (params.orden) query.append('orden', params.orden);
   const qs = query.toString() ? `?${query.toString()}` : '';
   return request(`/productos${qs}`);
+}
+
+export async function getProductosAdmin() {
+  return request('/productos/admin');
+}
+
+export async function getCategorias() {
+  return request('/productos/categorias');
 }
 
 export async function getProductoById(id) {
@@ -79,11 +90,20 @@ export async function getClientes() {
   return request('/clientes');
 }
 
+export async function getClienteById(id) {
+  return request(`/clientes/${id}`);
+}
+
 export async function createCliente(clienteData) {
   return request('/clientes', {
     method: 'POST',
     body: JSON.stringify(clienteData),
   });
+}
+
+export async function getCostoEnvio(ciudad) {
+  const qs = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : '';
+  return request(`/clientes/calcular-envio${qs}`);
 }
 
 // -------------------------------------------------------------
@@ -93,10 +113,14 @@ export async function getCupones() {
   return request('/cupones');
 }
 
-export async function validarCupon(codigo, cliente_id) {
+export async function getCuponById(id) {
+  return request(`/cupones/${id}`);
+}
+
+export async function validarCupon(codigo, cliente_id, subtotal = 0) {
   return request('/cupones/validar', {
     method: 'POST',
-    body: JSON.stringify({ codigo, cliente_id }),
+    body: JSON.stringify({ codigo, cliente_id, subtotal }),
   });
 }
 
@@ -105,7 +129,7 @@ export async function validarCupon(codigo, cliente_id) {
 // -------------------------------------------------------------
 export async function getOrdenes(params = {}) {
   const query = new URLSearchParams();
-  if (params.estado) query.append('estado', params.estado);
+  if (params.estado && params.estado !== 'Todos') query.append('estado', params.estado);
   if (params.cliente_id) query.append('cliente_id', params.cliente_id);
   const qs = query.toString() ? `?${query.toString()}` : '';
   return request(`/ordenes${qs}`);
@@ -152,9 +176,9 @@ export async function generarDescripcionIA(nombre, categoria) {
   });
 }
 
-export async function recomendarCarritoIA(productoIds) {
-  return request('/ia/recomendar-carrito', {
+export async function recomendarCarritoIA(productoIds = []) {
+  return request('/ia/recomendar', {
     method: 'POST',
-    body: JSON.stringify({ producto_ids: productoIds }),
+    body: JSON.stringify({ carrito_ids: productoIds }),
   });
 }

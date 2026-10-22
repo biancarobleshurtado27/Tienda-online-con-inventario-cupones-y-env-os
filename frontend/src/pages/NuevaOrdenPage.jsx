@@ -10,6 +10,8 @@ import {
 } from '../services/api.js';
 import AlertBox from '../components/AlertBox.jsx';
 import Modal from '../components/Modal.jsx';
+import LoadingState from '../components/LoadingState.jsx';
+import FormField from '../components/FormField.jsx';
 import { 
   ShoppingCart, 
   User, 
@@ -137,23 +139,28 @@ export default function NuevaOrdenPage() {
     return parseFloat(((subtotal * cuponAplicado.porcentaje) / 100).toFixed(2));
   }, [subtotal, cuponAplicado]);
 
-  // Regla de negocio de envío según ciudad y umbral de $100
+  // Regla de negocio de envío según ciudad y umbral de $50.00
   const costoEnvio = useMemo(() => {
     if (itemsCarrito.length === 0) return 0;
     const subtotalConDescuento = subtotal - descuento;
-    if (subtotalConDescuento >= 100) return 0; // Envío gratis si supera $100
+    if (subtotalConDescuento >= 50.00) return 0; // Envío gratis si supera $50.00
 
-    if (!clienteSeleccionado) return 3.50;
-    const ciudad = clienteSeleccionado.ciudad.toLowerCase();
-    if (ciudad.includes('san josé')) return 3.50;
-    if (ciudad.includes('heredia')) return 4.00;
-    if (ciudad.includes('alajuela')) return 4.50;
-    if (ciudad.includes('cartago')) return 5.00;
-    return 7.00; // Otras provincias
+    if (!clienteSeleccionado) return 10.00;
+    const ciudad = clienteSeleccionado.ciudad;
+    const tarifas = {
+      'San José': 5.00,
+      'Heredia': 6.00,
+      'Alajuela': 7.00,
+      'Cartago': 8.00,
+      'Puntarenas': 10.00,
+      'Guanacaste': 12.00,
+      'Limón': 12.00
+    };
+    return tarifas[ciudad] !== undefined ? tarifas[ciudad] : 10.00;
   }, [subtotal, descuento, itemsCarrito, clienteSeleccionado]);
 
   const total = useMemo(() => {
-    return Math.max(0, subtotal - descuento + costoEnvio);
+    return Math.max(0, Number((subtotal - descuento + costoEnvio).toFixed(2)));
   }, [subtotal, descuento, costoEnvio]);
 
   // Crear orden y enviar al backend
@@ -174,7 +181,7 @@ export default function NuevaOrdenPage() {
     try {
       const payload = {
         cliente_id: parseInt(clienteId, 10),
-        cupon_codigo: cuponAplicado ? cuponAplicado.codigo : null,
+        codigo_cupon: cuponAplicado ? cuponAplicado.codigo : null,
         items: itemsCarrito.map(i => ({
           producto_id: i.producto.id,
           cantidad: i.cantidad
@@ -182,7 +189,8 @@ export default function NuevaOrdenPage() {
       };
 
       const respuesta = await createOrden(payload);
-      setSuccessMsg(`¡Orden #${respuesta.orden.id} creada exitosamente! Stock descontado en transacción.`);
+      const nuevaId = respuesta?.id || respuesta?.orden?.id || 'creada';
+      setSuccessMsg(`¡Orden #${nuevaId} creada exitosamente! Stock descontado de forma atómica en el inventario.`);
       setItemsCarrito([]);
       setCuponAplicado(null);
       setCodigoCupon('');
@@ -205,11 +213,12 @@ export default function NuevaOrdenPage() {
     try {
       const resp = await createCliente(nuevoCliente);
       await refetchClientes();
-      setClienteId(resp.cliente.id);
+      const nuevoId = resp?.cliente?.id || resp?.id;
+      if (nuevoId) setClienteId(String(nuevoId));
       setModalCliente(false);
       setNuevoCliente({ nombre: '', email: '', ciudad: 'San José' });
     } catch (err) {
-      alert(`Error al crear cliente: ${err.message}`);
+      setErrorMsg(`Error al registrar cliente: ${err.message}`);
     } finally {
       setGuardandoCliente(false);
     }
@@ -231,6 +240,10 @@ export default function NuevaOrdenPage() {
 
       {errorMsg && <AlertBox type="error" message={errorMsg} onClose={() => setErrorMsg(null)} />}
       {successMsg && <AlertBox type="success" message={successMsg} onClose={() => setSuccessMsg(null)} />}
+
+      {(loadingProds || loadingClientes) && (
+        <LoadingState message="Cargando catálogo de productos y clientes..." />
+      )}
 
       <div style={{
         display: 'grid',

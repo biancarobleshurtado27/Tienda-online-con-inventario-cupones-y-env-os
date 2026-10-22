@@ -9,6 +9,9 @@ import {
 } from '../services/api.js';
 import Modal from '../components/Modal.jsx';
 import AlertBox from '../components/AlertBox.jsx';
+import LoadingState from '../components/LoadingState.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
+import FormField from '../components/FormField.jsx';
 import { 
   Package, 
   Search, 
@@ -18,7 +21,6 @@ import {
   Edit3, 
   Trash2, 
   Sparkles, 
-  CheckCircle,
   AlertCircle
 } from 'lucide-react';
 
@@ -30,11 +32,19 @@ export default function ProductosPage() {
   // Estados de búsqueda, filtros y orden
   const [busqueda, setBusqueda] = useState('');
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
-  const [criterioOrden, setCriterioOrden] = useState('nombre_asc'); // nombre_asc, precio_asc, precio_desc, stock_asc, stock_desc
+  const [criterioOrden, setCriterioOrden] = useState('nombre_asc');
 
   // Modal para Crear / Editar
   const [modalAbierto, setModalAbierto] = useState(false);
   const [productoEnEdicion, setProductoEnEdicion] = useState(null);
+
+  // Modal de Confirmación para Eliminar
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
+  const [eliminando, setEliminando] = useState(false);
+
+  // Alertas de página
+  const [pageError, setPageError] = useState(null);
+  const [pageSuccess, setPageSuccess] = useState(null);
 
   // Formulario controlado
   const [formData, setFormData] = useState({
@@ -98,7 +108,7 @@ export default function ProductosPage() {
           ...prev,
           descripcion: resp.data.descripcion_generada
         }));
-        setFormSuccess(`¡Descripción generada con éxito vía ${resp.data.fuente || 'IA'}!`);
+        setFormSuccess(`¡Descripción generada con éxito vía ${resp.data.fuente || 'IA Copilot'}!`);
       }
     } catch (err) {
       setFormError(`Error con el asistente IA: ${err.message}`);
@@ -113,14 +123,14 @@ export default function ProductosPage() {
     setFormError(null);
     setFormSuccess(null);
 
-    // Validación en el cliente
+    // Validación estricta en el cliente
     if (!formData.nombre.trim()) {
       setFormError('El nombre del producto es obligatorio.');
       return;
     }
     const precioNum = parseFloat(formData.precio);
     if (isNaN(precioNum) || precioNum <= 0) {
-      setFormError('El precio debe ser un número positivo mayor a 0.');
+      setFormError('El precio debe ser un número positivo finito mayor a 0.');
       return;
     }
     const stockNum = parseInt(formData.stock, 10);
@@ -142,28 +152,39 @@ export default function ProductosPage() {
 
       if (productoEnEdicion) {
         await updateProducto(productoEnEdicion.id, payload);
+        setPageSuccess(`Producto "${payload.nombre}" actualizado exitosamente.`);
       } else {
         await createProducto(payload);
+        setPageSuccess(`Producto "${payload.nombre}" creado exitosamente.`);
       }
 
       setModalAbierto(false);
       refetch();
     } catch (err) {
-      // Captura y despliega error de la API (400)
-      setFormError(err.message || 'Error al guardar el producto');
+      // Muestra el mensaje exacto devuelto por la API (400, 404, 409)
+      setFormError(err.message || 'Error al procesar el producto.');
     } finally {
       setGuardando(false);
     }
   };
 
-  // Eliminar producto
-  const handleDelete = async (id, nombre) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar "${nombre}"?`)) return;
+  // Confirmar y Ejecutar Eliminación
+  const handleConfirmDelete = async () => {
+    if (!productoAEliminar) return;
+    setEliminando(true);
+    setPageError(null);
+    setPageSuccess(null);
     try {
-      await deleteProducto(id);
+      const res = await deleteProducto(productoAEliminar.id);
+      setPageSuccess(res.message || `Producto "${productoAEliminar.nombre}" eliminado correctamente.`);
+      setProductoAEliminar(null);
       refetch();
     } catch (err) {
-      alert(`Error al eliminar: ${err.message}`);
+      // Muestra error 400 o 409 de la API
+      setPageError(err.message || 'Error al eliminar el producto.');
+      setProductoAEliminar(null);
+    } finally {
+      setEliminando(false);
     }
   };
 
@@ -216,6 +237,8 @@ export default function ProductosPage() {
       </div>
 
       {error && <AlertBox type="error" message={error} />}
+      {pageError && <AlertBox type="error" message={pageError} onClose={() => setPageError(null)} />}
+      {pageSuccess && <AlertBox type="success" message={pageSuccess} onClose={() => setPageSuccess(null)} />}
 
       {/* Barra de Filtros, Búsqueda y Orden */}
       <div className="card" style={{ padding: '16px 20px', marginBottom: 24 }}>
@@ -286,11 +309,9 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {/* Grid de Productos */}
+      {/* Grid de Productos o Estado de Carga */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-          Cargando catálogo...
-        </div>
+        <LoadingState message="Cargando catálogo de productos desde el backend..." />
       ) : productosFiltrados.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
           <AlertCircle size={40} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
@@ -386,7 +407,7 @@ export default function ProductosPage() {
                     <Edit3 size={15} /> Editar
                   </button>
                   <button 
-                    onClick={() => handleDelete(prod.id, prod.nombre)}
+                    onClick={() => setProductoAEliminar(prod)}
                     className="btn btn-danger btn-sm"
                     title="Eliminar producto"
                   >
@@ -399,7 +420,7 @@ export default function ProductosPage() {
         </div>
       )}
 
-      {/* Modal Crear / Editar con Copilot IA */}
+      {/* Modal Crear / Editar con FormField y Copilot IA */}
       <Modal
         isOpen={modalAbierto}
         onClose={() => setModalAbierto(false)}
@@ -409,8 +430,7 @@ export default function ProductosPage() {
           {formError && <AlertBox type="error" message={formError} onClose={() => setFormError(null)} />}
           {formSuccess && <AlertBox type="success" message={formSuccess} onClose={() => setFormSuccess(null)} />}
 
-          <div className="form-group">
-            <label className="form-label">Nombre del Producto</label>
+          <FormField label="Nombre del Producto" required>
             <input
               type="text"
               required
@@ -419,11 +439,10 @@ export default function ProductosPage() {
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               placeholder="Ej. Teclado Mecánico RGB Switch Red"
             />
-          </div>
+          </FormField>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div className="form-group">
-              <label className="form-label">Precio ($ USD)</label>
+            <FormField label="Precio ($ USD)" required>
               <input
                 type="number"
                 step="0.01"
@@ -434,9 +453,8 @@ export default function ProductosPage() {
                 onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
                 placeholder="49.99"
               />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Stock Inicial</label>
+            </FormField>
+            <FormField label="Stock Inicial" required>
               <input
                 type="number"
                 min="0"
@@ -446,11 +464,10 @@ export default function ProductosPage() {
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                 placeholder="10"
               />
-            </div>
+            </FormField>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Categoría</label>
+          <FormField label="Categoría" required>
             <select
               className="select"
               value={formData.categoria}
@@ -461,11 +478,11 @@ export default function ProductosPage() {
               <option value="Monitores">Monitores</option>
               <option value="Accesorios">Accesorios</option>
             </select>
-          </div>
+          </FormField>
 
-          <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <label className="form-label" style={{ margin: 0 }}>Descripción Comercial</label>
+          <FormField
+            label="Descripción Comercial"
+            actionButton={
               <button
                 type="button"
                 onClick={handleGenerarDescripcionIA}
@@ -474,9 +491,10 @@ export default function ProductosPage() {
                 style={{ padding: '3px 8px', fontSize: '0.75rem' }}
               >
                 <Sparkles size={14} />
-                {generandoIA ? 'Generando con IA...' : 'Generar con Asistente IA'}
+                {generandoIA ? 'Generando...' : 'Generar con IA'}
               </button>
-            </div>
+            }
+          >
             <textarea
               className="textarea"
               rows={3}
@@ -484,9 +502,9 @@ export default function ProductosPage() {
               onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
               placeholder="Descripción persuasiva para la ficha de producto..."
             />
-          </div>
+          </FormField>
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
             <input
               type="checkbox"
               id="activo-check"
@@ -499,7 +517,7 @@ export default function ProductosPage() {
             </label>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
             <button
               type="button"
               onClick={() => setModalAbierto(false)}
@@ -517,6 +535,18 @@ export default function ProductosPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Modal de Confirmación de Eliminación */}
+      <ConfirmModal
+        isOpen={Boolean(productoAEliminar)}
+        onClose={() => setProductoAEliminar(null)}
+        onConfirm={handleConfirmDelete}
+        title="¿Eliminar producto del inventario?"
+        message={`¿Estás seguro de que deseas eliminar "${productoAEliminar?.nombre}"? Si tiene órdenes asociadas pasará a estado inactivo para preservar el historial.`}
+        confirmText="Eliminar Producto"
+        isDestructive={true}
+        loading={eliminando}
+      />
     </div>
   );
 }

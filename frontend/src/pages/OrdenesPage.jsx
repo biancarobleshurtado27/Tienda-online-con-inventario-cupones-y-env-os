@@ -9,6 +9,9 @@ import {
 import StatusBadge from '../components/StatusBadge.jsx';
 import AlertBox from '../components/AlertBox.jsx';
 import Modal from '../components/Modal.jsx';
+import TableList from '../components/TableList.jsx';
+import LoadingState from '../components/LoadingState.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
 import { 
   ClipboardList, 
   Filter, 
@@ -19,8 +22,7 @@ import {
   PackageCheck,
   User,
   Calendar,
-  DollarSign,
-  RotateCcw
+  DollarSign
 } from 'lucide-react';
 
 const ESTADOS_FILTRO = ['Todos', 'nueva', 'pagada', 'enviada', 'entregada', 'cancelada'];
@@ -37,6 +39,10 @@ export default function OrdenesPage() {
   const [loadingDetalle, setLoadingDetalle] = useState(false);
   const [modalDetalleAbierto, setModalDetalleAbierto] = useState(false);
 
+  // Modal de confirmación para cancelar orden
+  const [ordenACancelar, setOrdenACancelar] = useState(null);
+  const [cancelando, setCancelando] = useState(false);
+
   // Feedback de acciones
   const [actionError, setActionError] = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
@@ -51,6 +57,7 @@ export default function OrdenesPage() {
       setOrdenDetalle(detalle);
       setModalDetalleAbierto(true);
     } catch (err) {
+      // Captura y despliega error de la API (400, 404)
       setActionError(`Error al obtener detalle: ${err.message}`);
     } finally {
       setLoadingDetalle(false);
@@ -70,34 +77,33 @@ export default function OrdenesPage() {
         setOrdenDetalle({ ...ordenDetalle, estado: proximoEstado });
       }
     } catch (err) {
-      // Muestra error 409 si el cambio de estado es inválido
+      // Muestra error 400 o 409 si el cambio de estado es inválido
       setActionError(err.message || 'Error al actualizar estado.');
     } finally {
       setProcesandoId(null);
     }
   };
 
-  // Cancelar orden (desencadena reposición de stock en el backend con transacción)
-  const handleCancelarOrden = async (orden) => {
-    if (!window.confirm(`¿Confirmas la cancelación de la Orden #${orden.id}? Los productos reservados serán devueltos al inventario.`)) {
-      return;
-    }
-
-    setProcesandoId(orden.id);
+  // Confirmar y Cancelar orden (desencadena reposición de stock atómica)
+  const handleConfirmarCancelacion = async () => {
+    if (!ordenACancelar) return;
+    setCancelando(true);
     setActionError(null);
     setActionSuccess(null);
     try {
-      const res = await cancelarOrden(orden.id);
-      setActionSuccess(res.mensaje || `Orden #${orden.id} cancelada. Inventario repuesto correctamente.`);
+      const res = await cancelarOrden(ordenACancelar.id);
+      setActionSuccess(res.message || `Orden #${ordenACancelar.id} cancelada. Inventario repuesto con éxito.`);
+      setOrdenACancelar(null);
       refetch();
-      if (ordenDetalle && ordenDetalle.id === orden.id) {
+      if (ordenDetalle && ordenDetalle.id === ordenACancelar.id) {
         setOrdenDetalle({ ...ordenDetalle, estado: 'cancelada' });
       }
     } catch (err) {
-      // Captura y despliega error 409 (regla de negocio: no se puede cancelar si ya fue enviada o entregada)
+      // Captura y despliega error 400 o 409
       setActionError(err.message || 'No se puede cancelar esta orden.');
+      setOrdenACancelar(null);
     } finally {
-      setProcesandoId(null);
+      setCancelando(false);
     }
   };
 
@@ -108,6 +114,17 @@ export default function OrdenesPage() {
     if (estado === 'enviada') return 'entregada';
     return null;
   };
+
+  // Columnas para TableList
+  const columns = [
+    { header: 'ID', width: '80px' },
+    { header: 'Fecha', width: '160px' },
+    { header: 'Cliente' },
+    { header: 'Ciudad de Envío' },
+    { header: 'Total', width: '120px' },
+    { header: 'Estado', width: '140px' },
+    { header: 'Acciones Permitidas', align: 'right', width: '260px' }
+  ];
 
   return (
     <div className="container fade-in">
@@ -128,9 +145,11 @@ export default function OrdenesPage() {
       {error && <AlertBox type="error" message={error} />}
 
       {/* Filtro por estado */}
-      <div className="card" style={{ padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Filter size={18} color="var(--text-muted)" />
-        <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Filtrar por estado:</span>
+      <div className="card" style={{ padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Filter size={18} color="var(--text-muted)" />
+          <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Filtrar por estado:</span>
+        </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {ESTADOS_FILTRO.map(est => (
             <button
@@ -150,107 +169,90 @@ export default function OrdenesPage() {
         </div>
       </div>
 
-      {/* Tabla / Lista de Órdenes */}
+      {/* Tabla / Lista de Órdenes con TableList */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-          Cargando listado de órdenes...
-        </div>
-      ) : ordenes.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
-          <h3>No se encontraron órdenes</h3>
-          <p style={{ marginTop: 6, fontSize: '0.9rem' }}>No hay registros que coincidan con el filtro seleccionado.</p>
-        </div>
+        <LoadingState message="Cargando listado de órdenes..." />
       ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-              <thead>
-                <tr style={{ backgroundColor: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
-                  <th style={{ padding: '14px 20px', fontWeight: 700 }}>ID</th>
-                  <th style={{ padding: '14px 20px', fontWeight: 700 }}>Fecha</th>
-                  <th style={{ padding: '14px 20px', fontWeight: 700 }}>Cliente</th>
-                  <th style={{ padding: '14px 20px', fontWeight: 700 }}>Ciudad</th>
-                  <th style={{ padding: '14px 20px', fontWeight: 700 }}>Total</th>
-                  <th style={{ padding: '14px 20px', fontWeight: 700 }}>Estado</th>
-                  <th style={{ padding: '14px 20px', fontWeight: 700, textAlign: 'right' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ordenes.map(orden => {
-                  const siguiente = getSiguienteEstado(orden.estado);
-                  const sePuedeCancelar = orden.estado === 'nueva' || orden.estado === 'pagada';
-                  const isProcessing = procesandoId === orden.id;
+        <TableList
+          columns={columns}
+          data={ordenes}
+          keyExtractor={(o) => o.id}
+          emptyTitle="No se encontraron órdenes"
+          emptyMessage="No hay registros que coincidan con el filtro seleccionado."
+          renderRow={(orden) => {
+            const siguiente = getSiguienteEstado(orden.estado);
+            const sePuedeCancelar = orden.estado === 'nueva' || orden.estado === 'pagada';
+            const isProcessing = procesandoId === orden.id;
 
-                  return (
-                    <tr 
-                      key={orden.id}
-                      style={{ 
-                        borderBottom: '1px solid var(--border-color)',
-                        transition: 'background-color 0.15s ease'
-                      }}
+            return (
+              <>
+                <td style={{ padding: '14px 20px', fontWeight: 800 }}>#{orden.id}</td>
+                <td style={{ padding: '14px 20px', color: 'var(--text-muted)' }}>
+                  {orden.fecha ? new Date(orden.fecha).toLocaleDateString('es-CR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                </td>
+                <td style={{ padding: '14px 20px', fontWeight: 600 }}>
+                  {orden.cliente?.nombre || orden.cliente_nombre || `Cliente #${orden.cliente_id}`}
+                </td>
+                <td style={{ padding: '14px 20px', color: 'var(--text-muted)' }}>
+                  {orden.cliente?.ciudad || orden.cliente_ciudad || '-'}
+                </td>
+                <td style={{ padding: '14px 20px', fontWeight: 800, color: 'white' }}>
+                  ${orden.total.toFixed(2)}
+                </td>
+                <td style={{ padding: '14px 20px' }}>
+                  <StatusBadge estado={orden.estado} />
+                </td>
+                <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                  <div style={{ display: 'inline-flex', gap: 6 }}>
+                    <button
+                      onClick={() => handleVerDetalle(orden.id)}
+                      className="btn btn-secondary btn-sm"
+                      title="Ver detalle completo"
                     >
-                      <td style={{ padding: '14px 20px', fontWeight: 800 }}>#{orden.id}</td>
-                      <td style={{ padding: '14px 20px', color: 'var(--text-muted)' }}>
-                        {orden.fecha ? new Date(orden.fecha).toLocaleDateString('es-CR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
-                      </td>
-                      <td style={{ padding: '14px 20px', fontWeight: 600 }}>{orden.cliente_nombre || `Cliente #${orden.cliente_id}`}</td>
-                      <td style={{ padding: '14px 20px', color: 'var(--text-muted)' }}>{orden.cliente_ciudad || '-'}</td>
-                      <td style={{ padding: '14px 20px', fontWeight: 800, color: 'white' }}>${orden.total.toFixed(2)}</td>
-                      <td style={{ padding: '14px 20px' }}>
-                        <StatusBadge estado={orden.estado} />
-                      </td>
-                      <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
-                          <button
-                            onClick={() => handleVerDetalle(orden.id)}
-                            className="btn btn-secondary btn-sm"
-                            title="Ver detalle completo"
-                          >
-                            <Eye size={14} /> Detalle
-                          </button>
+                      <Eye size={14} /> Detalle
+                    </button>
 
-                          {siguiente && (
-                            <button
-                              onClick={() => handleAvanzarEstado(orden, siguiente)}
-                              disabled={isProcessing}
-                              className="btn btn-primary btn-sm"
-                              title={`Avanzar a ${siguiente}`}
-                            >
-                              {siguiente === 'pagada' && <CheckCircle size={14} />}
-                              {siguiente === 'enviada' && <Truck size={14} />}
-                              {siguiente === 'entregada' && <PackageCheck size={14} />}
-                              A {siguiente}
-                            </button>
-                          )}
+                    {siguiente && (
+                      <button
+                        onClick={() => handleAvanzarEstado(orden, siguiente)}
+                        disabled={isProcessing}
+                        className="btn btn-primary btn-sm"
+                        title={`Avanzar a ${siguiente}`}
+                      >
+                        {siguiente === 'pagada' && <CheckCircle size={14} />}
+                        {siguiente === 'enviada' && <Truck size={14} />}
+                        {siguiente === 'entregada' && <PackageCheck size={14} />}
+                        A {siguiente}
+                      </button>
+                    )}
 
-                          {sePuedeCancelar && (
-                            <button
-                              onClick={() => handleCancelarOrden(orden)}
-                              disabled={isProcessing}
-                              className="btn btn-danger btn-sm"
-                              title="Cancelar orden y reponer inventario"
-                            >
-                              <XCircle size={14} /> Cancelar
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    {sePuedeCancelar && (
+                      <button
+                        onClick={() => setOrdenACancelar(orden)}
+                        disabled={isProcessing}
+                        className="btn btn-danger btn-sm"
+                        title="Cancelar orden y reponer inventario"
+                      >
+                        <XCircle size={14} /> Cancelar
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </>
+            );
+          }}
+        />
       )}
 
-      {/* Modal de Detalle de Orden (GET /:id con datos relacionados) */}
+      {/* Modal de Detalle de Orden (consume GET /api/ordenes/:id) */}
       <Modal
         isOpen={modalDetalleAbierto}
         onClose={() => setModalDetalleAbierto(false)}
         title={ordenDetalle ? `Detalle de la Orden #${ordenDetalle.id}` : 'Cargando...'}
       >
-        {ordenDetalle && (
+        {loadingDetalle ? (
+          <LoadingState message="Consultando datos de la orden en el backend..." height="200px" />
+        ) : ordenDetalle && (
           <div>
             <div style={{
               display: 'flex',
@@ -273,18 +275,18 @@ export default function OrdenesPage() {
               </div>
             </div>
 
-            {/* Datos del Cliente */}
+            {/* Datos del Cliente y Cupón */}
             <div style={{ marginBottom: 20 }}>
               <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <User size={16} /> Cliente & Destino
               </h4>
               <div style={{ backgroundColor: 'var(--bg-main)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.875rem' }}>
-                <p><strong>Nombre:</strong> {ordenDetalle.cliente?.nombre}</p>
-                <p><strong>Email:</strong> {ordenDetalle.cliente?.email}</p>
-                <p><strong>Ciudad de entrega:</strong> {ordenDetalle.cliente?.ciudad}</p>
-                {ordenDetalle.cupon && (
+                <p><strong>Nombre:</strong> {ordenDetalle.cliente?.nombre || ordenDetalle.cliente_nombre}</p>
+                <p><strong>Email:</strong> {ordenDetalle.cliente?.email || ordenDetalle.cliente_email}</p>
+                <p><strong>Ciudad de entrega:</strong> {ordenDetalle.cliente?.ciudad || ordenDetalle.cliente_ciudad}</p>
+                {(ordenDetalle.cupon || ordenDetalle.cupon_codigo) && (
                   <p style={{ color: 'var(--success)', marginTop: 4 }}>
-                    <strong>Cupón aplicado:</strong> {ordenDetalle.cupon.codigo} (-{ordenDetalle.cupon.porcentaje}%)
+                    <strong>Cupón aplicado:</strong> {ordenDetalle.cupon?.codigo || ordenDetalle.cupon_codigo} (-{ordenDetalle.cupon?.porcentaje || ordenDetalle.cupon_porcentaje}%)
                   </p>
                 )}
               </div>
@@ -293,12 +295,12 @@ export default function OrdenesPage() {
             {/* Productos relacionados (orden_items) */}
             <div style={{ marginBottom: 20 }}>
               <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                Artículos Comprados
+                Artículos Comprados ({ordenDetalle.items?.length || 0})
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {(ordenDetalle.items || []).map(item => (
+                {(ordenDetalle.items || []).map((item, idx) => (
                   <div
-                    key={item.id}
+                    key={item.id || idx}
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -311,7 +313,7 @@ export default function OrdenesPage() {
                     <div>
                       <div style={{ fontWeight: 600 }}>{item.producto_nombre}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        ${item.precio_unitario.toFixed(2)} x {item.cantidad} unidades
+                        ${item.precio_unitario.toFixed(2)} x {item.cantidad} unidad(es)
                       </div>
                     </div>
                     <div style={{ fontWeight: 700, color: 'white' }}>
@@ -322,7 +324,7 @@ export default function OrdenesPage() {
               </div>
             </div>
 
-            {/* Resumen de totales */}
+            {/* Resumen financiero */}
             <div style={{
               backgroundColor: 'var(--bg-main)',
               padding: '14px 16px',
@@ -339,7 +341,7 @@ export default function OrdenesPage() {
               </div>
               {ordenDetalle.descuento > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}>
-                  <span>Descuento:</span>
+                  <span>Descuento cupón:</span>
                   <span>-${ordenDetalle.descuento.toFixed(2)}</span>
                 </div>
               )}
@@ -370,6 +372,19 @@ export default function OrdenesPage() {
           </div>
         )}
       </Modal>
+
+      {/* Confirmación de Cancelación */}
+      <ConfirmModal
+        isOpen={Boolean(ordenACancelar)}
+        onClose={() => setOrdenACancelar(null)}
+        onConfirm={handleConfirmarCancelacion}
+        title={`¿Cancelar Orden #${ordenACancelar?.id}?`}
+        message={`¿Estás seguro de que deseas cancelar la Orden #${ordenACancelar?.id}? Esta acción repondrá inmediatamente las unidades reservadas en el inventario del almacén.`}
+        confirmText="Cancelar Orden"
+        cancelText="Volver"
+        isDestructive={true}
+        loading={cancelando}
+      />
     </div>
   );
 }

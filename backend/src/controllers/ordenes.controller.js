@@ -30,14 +30,17 @@ export const ordenesController = {
 
   create(req, res) {
     try {
-      const { cliente_id, items, codigo_cupon, estado_inicial } = req.body || {};
+      const { cliente_id, items, codigo_cupon, cupon_codigo, estado_inicial } = req.body || {};
       const nuevaOrden = ordenesService.crearOrden({
         cliente_id,
         items,
-        codigo_cupon,
+        codigo_cupon: codigo_cupon || cupon_codigo,
         estado_inicial
       });
-      res.status(201).json(nuevaOrden);
+      res.status(201).json({
+        ...nuevaOrden,
+        orden: nuevaOrden
+      });
     } catch (error) {
       res.status(error.statusCode || 500).json({ error: error.message });
     }

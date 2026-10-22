@@ -4,6 +4,7 @@ import { getResumen } from '../services/api.js';
 import MetricCard from '../components/MetricCard.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import AlertBox from '../components/AlertBox.jsx';
+import LoadingState from '../components/LoadingState.jsx';
 import { 
   DollarSign, 
   ShoppingBag, 
@@ -11,8 +12,8 @@ import {
   Tag, 
   Award, 
   AlertTriangle, 
-  RefreshCw,
-  Layers
+  RefreshCw, 
+  Layers 
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -20,12 +21,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="container" style={{ textAlign: 'center', padding: '80px 20px' }}>
-        <div style={{ color: 'var(--primary)', marginBottom: 16 }}>
-          <RefreshCw size={36} className="spin" style={{ animation: 'spin 1s linear infinite' }} />
-        </div>
-        <p style={{ color: 'var(--text-muted)' }}>Cargando métricas del panel en tiempo real...</p>
-        <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+      <div className="container" style={{ padding: '60px 20px' }}>
+        <LoadingState message="Cargando métricas del panel en tiempo real..." />
       </div>
     );
   }
