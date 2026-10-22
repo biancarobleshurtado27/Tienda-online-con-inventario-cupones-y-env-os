@@ -8,8 +8,8 @@ import { useState, useEffect, useCallback } from 'react';
  * @param {Function} fetcherFn - Función asíncrona que retorna datos
  * @param {Array} deps - Dependencias reactivas que disparan una nueva petición
  */
-export function useFetch(fetcherFn, deps = []) {
-  const [data, setData] = useState(null);
+export function useFetch(fetcherFn, deps = [], initialData = null) {
+  const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 

@@ -30,8 +30,11 @@ import {
 
 export default function NuevaOrdenPage() {
   const navigate = useNavigate();
-  const { data: productos = [], loading: loadingProds } = useFetch(getProductos);
-  const { data: clientes = [], loading: loadingClientes, refetch: refetchClientes } = useFetch(getClientes);
+  const { data: productosData, loading: loadingProds, error: errorProds } = useFetch(getProductos, [], []);
+  const { data: clientesData, loading: loadingClientes, error: errorClientes, refetch: refetchClientes } = useFetch(getClientes, [], []);
+
+  const productos = useMemo(() => (Array.isArray(productosData) ? productosData : []), [productosData]);
+  const clientes = useMemo(() => (Array.isArray(clientesData) ? clientesData : []), [clientesData]);
 
   // Estados del formulario de orden
   const [clienteId, setClienteId] = useState('');

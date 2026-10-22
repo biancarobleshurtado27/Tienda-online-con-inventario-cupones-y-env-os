@@ -27,7 +27,8 @@ import {
 const CATEGORIAS = ['Todas', 'Periféricos', 'Audio', 'Monitores', 'Accesorios'];
 
 export default function ProductosPage() {
-  const { data: productos = [], loading, error, refetch } = useFetch(getProductos);
+  const { data: productosData, loading, error, refetch } = useFetch(getProductos, [], []);
+  const productos = useMemo(() => (Array.isArray(productosData) ? productosData : []), [productosData]);
 
   // Estados de búsqueda, filtros y orden
   const [busqueda, setBusqueda] = useState('');

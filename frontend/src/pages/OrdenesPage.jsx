@@ -29,10 +29,12 @@ const ESTADOS_FILTRO = ['Todos', 'nueva', 'pagada', 'enviada', 'entregada', 'can
 
 export default function OrdenesPage() {
   const [filtroEstado, setFiltroEstado] = useState('Todos');
-  const { data: ordenes = [], loading, error, refetch } = useFetch(
+  const { data: ordenesData, loading, error, refetch } = useFetch(
     () => getOrdenes(filtroEstado !== 'Todos' ? { estado: filtroEstado } : {}),
-    [filtroEstado]
+    [filtroEstado],
+    []
   );
+  const ordenes = React.useMemo(() => (Array.isArray(ordenesData) ? ordenesData : []), [ordenesData]);
 
   // Detalle de orden seleccionada
   const [ordenDetalle, setOrdenDetalle] = useState(null);

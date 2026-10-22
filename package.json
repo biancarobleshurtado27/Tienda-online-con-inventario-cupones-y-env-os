@@ -1,0 +1,16 @@
+{
+  "name": "tienda-online-laboratorio2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Laboratorio 2 - Tienda online con inventario, cupones, envios y asistente n8n",
+  "scripts": {
+    "server": "npm --prefix backend run dev",
+    "api": "npm --prefix backend run dev",
+    "backend": "npm --prefix backend run dev",
+    "frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "test": "npm --prefix backend run test-endpoints"
+  }
+}
