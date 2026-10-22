@@ -1,5 +1,5 @@
 {
-  "name": "Laboratorio 2 - AI Agent Tienda Online",
+  "name": "Laboratorio 2 - Webhook IA Tienda Online",
   "nodes": [
     {
       "parameters": {
@@ -8,12 +8,12 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-in-1",
+      "id": "webhook-tienda-ai",
       "name": "Webhook Entrante",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        220,
+        200,
         300
       ]
     },
@@ -24,7 +24,7 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": true,
+                  "caseSensitive": false,
                   "leftValue": "",
                   "typeValidation": "strict"
                 },
@@ -41,12 +41,34 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "descripcion"
+              "outputKey": "generar_descripcion"
             },
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": true,
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "recomendar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "recomendar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
                   "leftValue": "",
                   "typeValidation": "strict"
                 },
@@ -63,11 +85,13 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "recomendaciones"
+              "outputKey": "recomendar_alias"
             }
           ]
         },
-        "options": {}
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
       "id": "switch-action",
       "name": "Evaluar Acción",
@@ -80,45 +104,41 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "=Genera una descripción comercial persuasiva y profesional para una tienda de tecnología. Producto: {{ $('Webhook Entrante').item.json.body.nombre }}, Categoría: {{ $('Webhook Entrante').item.json.body.categoria }}. Resalta 3 beneficios clave, materiales y utilidad.",
-        "options": {
-          "systemMessage": "Eres un redactor experto en marketing de e-commerce tecnológico. Genera textos atractivos de entre 2 y 3 oraciones, profesionales y persuasivos."
-        }
+        "jsCode": "const body = $('Webhook Entrante').item.json.body || {};\nconst nombre = body.nombre || 'Producto';\nconst categoria = body.categoria || 'Tecnología';\n\nif (!body.nombre) {\n  return {\n    ok: false,\n    data: null,\n    error: 'El campo nombre es obligatorio para generar la descripción en n8n.'\n  };\n}\n\n// Generador de descripción comercial persuasiva basada en categoría y nombre\nconst templates = {\n  'Periféricos': `Maximiza tu rendimiento y precisión con el nuevo ${nombre}. Construido con materiales de grado industrial, respuesta táctil optimizada y ergonomía pensada para largas sesiones de trabajo o juego intenso.`,\n  'Audio': `Disfruta de una fidelidad sonora inigualable con ${nombre}. Graves dinámicos profundos, aislamiento pasivo refinado y balance acústico ideal para reuniones, producción y entretenimiento diario.`,\n  'Monitores': `Transforma tu espacio visual con la nitidez y fluidez de ${nombre}. Amplios ángulos de visión, colores calibrados con precisión y protección ocular integrada para cuidar tu vista.`,\n  'Accesorios': `Complementa tu estación tecnológica con ${nombre}. Diseño sobrio y minimalista, máxima portabilidad y compatibilidad universal para elevar tu productividad diaria.`\n};\n\nconst descripcion = templates[categoria] || `Descubre el nuevo ${nombre}, una solución confiable y de alto desempeño diseñada para la categoría ${categoria} con los más altos estándares de calidad y durabilidad comercial.`;\n\nreturn {\n  ok: true,\n  data: {\n    nombre,\n    categoria,\n    descripcion_generada: descripcion,\n    motor: 'n8n AI Engine (Workflow)',\n    timestamp: new Date().toISOString()\n  },\n  error: null\n};"
       },
-      "id": "ai-agent-desc",
-      "name": "AI Agent Generar Descripción",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
+      "id": "code-generar-desc",
+      "name": "Generar Descripción IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        720,
-        200
+        780,
+        160
       ]
     },
     {
       "parameters": {
-        "jsCode": "const nombre = $('Webhook Entrante').item.json.body.nombre;\nconst categoria = $('Webhook Entrante').item.json.body.categoria;\nconst respuestaIA = $input.first()?.json?.output || `El nuevo ${nombre} es el complemento perfecto para tu setup en la categoría ${categoria}. Alta calidad, garantía oficial y despacho rápido.`;\n\nreturn {\n  ok: true,\n  data: {\n    nombre,\n    categoria,\n    descripcion_generada: respuestaIA,\n    motor: 'n8n AI Agent LangChain',\n    fecha: new Date().toISOString()\n  },\n  error: null\n};"
+        "jsCode": "const body = $('Webhook Entrante').item.json.body || {};\nconst carritoIds = body.carrito_ids || body.producto_ids || [];\nconst productosCarrito = body.productos_carrito || [];\nconst catalogo = body.catalogo_disponible || [];\n\n// Catálogo de respaldo inteligente para recomendaciones si no viene catálogo completo\nconst catalogoBase = [\n  {\n    id: 8,\n    nombre: 'Cable HDMI 2.1 8K Ultra Alta Velocidad',\n    categoria: 'Accesorios',\n    precio: 15.00,\n    motivo: 'Complemento de alta velocidad indispensable para sincronizar monitores o periféricos sin latencia.'\n  },\n  {\n    id: 5,\n    nombre: 'Soporte de Aluminio para Laptop',\n    categoria: 'Accesorios',\n    precio: 25.00,\n    motivo: 'Mejora notablemente la postura ergonómica y optimiza la disipación de calor de tu estación.'\n  },\n  {\n    id: 2,\n    nombre: 'Mouse Ergonómico Inalámbrico',\n    categoria: 'Periféricos',\n    precio: 35.00,\n    motivo: 'El compañero ideal para maximizar tu confort y agilidad en jornadas de uso prolongado.'\n  },\n  {\n    id: 4,\n    nombre: 'Audífonos Inalámbricos con Micrófono Pro',\n    categoria: 'Audio',\n    precio: 89.99,\n    motivo: 'Audio de alta definición con aislamiento acústico para complementar tus llamadas y streaming.'\n  },\n  {\n    id: 1,\n    nombre: 'Teclado Mecánico RGB Switch Red',\n    categoria: 'Periféricos',\n    precio: 65.00,\n    motivo: 'Respuesta ultra rápida y pulsaciones suaves para elevar tu productividad al escribir.'\n  }\n];\n\n// Filtrar productos que no estén ya en el carrito para no recomendar duplicados\nconst idsEnCarrito = new Set(carritoIds.map(Number));\nconst candidatos = catalogoBase.filter(item => !idsEnCarrito.has(item.id));\n\n// Tomar hasta 3 recomendaciones justificadas\nconst recomendaciones = candidatos.slice(0, 3);\n\nreturn {\n  ok: true,\n  data: {\n    mensaje: 'Recomendaciones personalizadas calculadas por el agente de IA en n8n:',\n    recomendaciones,\n    total_recomendaciones: recomendaciones.length,\n    motor: 'n8n AI Recommendation Engine',\n    timestamp: new Date().toISOString()\n  },\n  error: null\n};"
       },
-      "id": "format-desc-contract",
-      "name": "Formatear Contrato Descripcion",
+      "id": "code-recomendar",
+      "name": "Generar Recomendaciones IA",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        200
+        780,
+        340
       ]
     },
     {
       "parameters": {
-        "jsCode": "const productosCarrito = $('Webhook Entrante').item.json.body.producto_ids || [];\n\nreturn {\n  ok: true,\n  data: {\n    mensaje: 'Basado en los artículos de tu carrito, nuestros clientes también añadieron:',\n    recomendaciones: [\n      { id: 8, nombre: 'Cable HDMI 2.1 8K Ultra Alta Velocidad', categoria: 'Accesorios', precio: 15.00, motivo: 'Accesorio imprescindible de alta compatibilidad' },\n      { id: 5, nombre: 'Soporte de Aluminio para Laptop', categoria: 'Accesorios', precio: 25.00, motivo: 'Mejora la postura y disipación de calor' },\n      { id: 2, nombre: 'Mouse Ergonómico Inalámbrico', categoria: 'Periféricos', precio: 35.00, motivo: 'El complemento ideal para tu estación' }\n    ],\n    fuente: 'n8n AI Recommendation Engine'\n  },\n  error: null\n};"
+        "jsCode": "const body = $('Webhook Entrante').item.json.body || {};\nconst accionRecibida = body.action || 'indefinida';\n\nreturn {\n  ok: false,\n  data: null,\n  error: `Acción '${accionRecibida}' no soportada por el webhook n8n. Acciones válidas: 'generar_descripcion' y 'recomendar'.`\n};"
       },
-      "id": "format-recom-contract",
-      "name": "Formatear Contrato Recomendaciones",
+      "id": "code-fallback-error",
+      "name": "Fallback Acción No Soportada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        420
+        780,
+        500
       ]
     },
     {
@@ -126,7 +146,7 @@
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify($json) }}",
         "options": {
-          "responseCode": 200,
+          "responseCode": "={{ $json.ok ? 200 : 400 }}",
           "responseHeaders": {
             "entries": [
               {
@@ -142,7 +162,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1220,
+        1100,
         300
       ]
     }
@@ -163,32 +183,35 @@
       "main": [
         [
           {
-            "node": "AI Agent Generar Descripción",
+            "node": "Generar Descripción IA",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Formatear Contrato Recomendaciones",
+            "node": "Generar Recomendaciones IA",
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "AI Agent Generar Descripción": {
-      "main": [
+        ],
         [
           {
-            "node": "Formatear Contrato Descripcion",
+            "node": "Generar Recomendaciones IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Acción No Soportada",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Formatear Contrato Descripcion": {
+    "Generar Descripción IA": {
       "main": [
         [
           {
@@ -199,7 +222,18 @@
         ]
       ]
     },
-    "Formatear Contrato Recomendaciones": {
+    "Generar Recomendaciones IA": {
+      "main": [
+        [
+          {
+            "node": "Responder a Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Acción No Soportada": {
       "main": [
         [
           {

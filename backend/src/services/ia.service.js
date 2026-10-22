@@ -3,8 +3,9 @@ import { isNonEmptyString, isValidId } from '../utils/validators.js';
 
 export const iaService = {
   /**
-   * Genera una descripción comercial atractiva y técnica
-   * para un producto dado su nombre y categoría.
+   * Genera una descripción comercial conectando exclusivamente con el webhook de n8n.
+   * Si n8n no está configurado o no responde, devuelve un error claro y honesto.
+   * Contrato garantizado: { "ok": boolean, "data": object|null, "error": string|null }
    */
   async generarDescripcion(nombre, categoria) {
     if (!isNonEmptyString(nombre) || !isNonEmptyString(categoria)) {
@@ -15,117 +16,143 @@ export const iaService = {
 
     const cleanNombre = nombre.trim();
     const cleanCategoria = categoria.trim();
-
     const n8nUrl = process.env.N8N_WEBHOOK_URL;
-    if (n8nUrl) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-        
-        const response = await fetch(n8nUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'generar_descripcion',
-            nombre: cleanNombre,
-            categoria: cleanCategoria
-          }),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const json = await response.json();
-          if (json && (json.ok !== undefined || json.data !== undefined)) {
-            return json;
-          }
-        }
-      } catch (err) {
-        console.warn('[IA Service] No se pudo contactar n8n webhook, usando motor local de IA/reglas:', err.message);
-      }
+    // Validación estricta y honesta: sin agente funcional local encubierto
+    if (!n8nUrl || n8nUrl.trim() === '') {
+      return {
+        ok: false,
+        data: null,
+        error: 'El servicio de IA no está configurado. La variable N8N_WEBHOOK_URL no está definida en backend/.env. Por favor, configura la URL del webhook de n8n.'
+      };
     }
 
-    // Generador inteligente de fallback con el mismo contrato { ok, data, error }
-    const templates = {
-      'Periféricos': `Potencia tu productividad y estación de juego con el nuevo ${cleanNombre}. Diseñado con materiales premium para máxima durabilidad, respuesta inmediata y confort ergonómico en jornadas intensas.`,
-      'Audio': `Experimenta una inmersión acústica inigualable con ${cleanNombre}. Calidad de sonido de alta fidelidad, graves profundos y nitidez cristalina para música, llamadas y streaming.`,
-      'Monitores': `Lleva tu experiencia visual al siguiente nivel con ${cleanNombre}. Excelente reproducción de color, fluidez visual y ángulos de visión amplios que cuidan tu vista.`,
-      'Accesorios': `Optimiza tu espacio de trabajo y rendimiento diario con ${cleanNombre}. Estructura confiable, diseño minimalista y máxima versatilidad.`
-    };
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const descripcion = templates[cleanCategoria] || `Descubre el nuevo ${cleanNombre}, diseñado especialmente para la categoría ${cleanCategoria} con el balance perfecto entre rendimiento, diseño y durabilidad.`;
+      const response = await fetch(n8nUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generar_descripcion',
+          nombre: cleanNombre,
+          categoria: cleanCategoria
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
-    return {
-      ok: true,
-      data: {
-        nombre: cleanNombre,
-        categoria: cleanCategoria,
-        descripcion_generada: descripcion,
-        fuente: 'Asistente IA (Tienda Copilot)'
-      },
-      error: null
-    };
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok || !json) {
+        return {
+          ok: false,
+          data: null,
+          error: json?.error || `El webhook de n8n respondió con error HTTP ${response.status} (${response.statusText}).`
+        };
+      }
+
+      // Si el webhook devolvió el contrato formal
+      if (typeof json.ok === 'boolean') {
+        return json;
+      }
+
+      return {
+        ok: true,
+        data: json,
+        error: null
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        data: null,
+        error: `No se pudo conectar con el webhook de n8n en ${n8nUrl} (${err.message}). Verifica que el servidor de n8n esté activo y el workflow esté encendido.`
+      };
+    }
   },
 
   /**
-   * Recomienda productos relacionados con los que el cliente tiene en el carrito
+   * Recomienda productos consultando exclusivamente al webhook de n8n.
+   * Enriquece la llamada con los ítems reales del carrito y catálogo disponible.
+   * Contrato garantizado: { "ok": boolean, "data": object|null, "error": string|null }
    */
   async recomendarProductos(carritoProductoIds = []) {
     const ids = Array.isArray(carritoProductoIds) 
       ? carritoProductoIds.filter(isValidId).map(Number)
       : [];
 
-    // Obtener categorías presentes en el carrito
-    let categoriasEnCarrito = [];
+    const n8nUrl = process.env.N8N_WEBHOOK_URL;
+
+    // Validación estricta y honesta: sin agente funcional local encubierto
+    if (!n8nUrl || n8nUrl.trim() === '') {
+      return {
+        ok: false,
+        data: null,
+        error: 'El servicio de recomendaciones de IA no está configurado. Define N8N_WEBHOOK_URL en backend/.env apuntando al webhook activo de n8n.'
+      };
+    }
+
+    // Obtener información real de los productos actualmente en el carrito
+    let productosCarrito = [];
     if (ids.length > 0) {
       const placeholders = ids.map(() => '?').join(',');
-      const rows = db.prepare(`SELECT DISTINCT categoria FROM productos WHERE id IN (${placeholders})`).all(...ids);
-      categoriasEnCarrito = rows.map(r => r.categoria);
+      productosCarrito = db.prepare(`SELECT id, nombre, categoria, precio FROM productos WHERE id IN (${placeholders})`).all(...ids);
     }
 
-    // Buscar productos complementarios en stock que no estén en el carrito
-    let recomendados = [];
-    if (categoriasEnCarrito.length > 0) {
-      const catPlaceholders = categoriasEnCarrito.map(() => '?').join(',');
-      const idPlaceholders = ids.map(() => '?').join(',');
-      
-      recomendados = db.prepare(`
-        SELECT id, nombre, descripcion, precio, stock, categoria
-        FROM productos
-        WHERE stock > 0 AND activo = 1
-          AND id NOT IN (${idPlaceholders})
-          AND categoria IN (${catPlaceholders})
-        ORDER BY precio ASC
-        LIMIT 3
-      `).all(...ids, ...categoriasEnCarrito);
+    // Obtener catálogo disponible en stock para que el modelo de IA pueda recomendar
+    const catalogoDisponible = db.prepare(`
+      SELECT id, nombre, categoria, precio, stock 
+      FROM productos 
+      WHERE stock > 0 AND activo = 1
+      ORDER BY stock DESC 
+      LIMIT 10
+    `).all();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const response = await fetch(n8nUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'recomendar',
+          carrito_ids: ids,
+          producto_ids: ids,
+          productos_carrito: productosCarrito,
+          catalogo_disponible: catalogoDisponible
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok || !json) {
+        return {
+          ok: false,
+          data: null,
+          error: json?.error || `El webhook de n8n respondió con error HTTP ${response.status} (${response.statusText}).`
+        };
+      }
+
+      // Si el webhook devolvió el contrato formal
+      if (typeof json.ok === 'boolean') {
+        return json;
+      }
+
+      return {
+        ok: true,
+        data: json,
+        error: null
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        data: null,
+        error: `No se pudo conectar con el webhook de n8n en ${n8nUrl} (${err.message}). Verifica que n8n esté ejecutándose y el webhook activo.`
+      };
     }
-
-    // Si aún faltan recomendaciones, completar con productos populares
-    if (recomendados.length < 3) {
-      const excludeIds = [...ids, ...recomendados.map(r => r.id)];
-      const excludePlaceholders = excludeIds.length > 0 ? excludeIds.map(() => '?').join(',') : '0';
-      
-      const complementarios = db.prepare(`
-        SELECT id, nombre, descripcion, precio, stock, categoria
-        FROM productos
-        WHERE stock > 0 AND activo = 1
-          AND id NOT IN (${excludePlaceholders})
-        ORDER BY id ASC
-        LIMIT ${3 - recomendados.length}
-      `).all(...(excludeIds.length > 0 ? excludeIds : []));
-
-      recomendados = [...recomendados, ...complementarios];
-    }
-
-    return {
-      ok: true,
-      data: {
-        recomendaciones: recomendados,
-        motivo: categoriasEnCarrito.length > 0 
-          ? `Basado en tus elecciones de ${categoriasEnCarrito.join(', ')}`
-          : 'Recomendaciones destacadas de la tienda'
-      },
-      error: null
-    };
   }
 };

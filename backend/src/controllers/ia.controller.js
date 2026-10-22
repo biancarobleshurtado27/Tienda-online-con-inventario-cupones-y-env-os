@@ -8,6 +8,8 @@ export const iaController = {
       res.status(200).json(resultado);
     } catch (error) {
       res.status(error.statusCode || 500).json({
+        ok: false,
+        data: null,
         error: error.message
       });
     }
@@ -15,11 +17,14 @@ export const iaController = {
 
   async recomendar(req, res) {
     try {
-      const { carrito_ids } = req.body || {};
-      const resultado = await iaService.recomendarProductos(carrito_ids || []);
+      const { carrito_ids, producto_ids } = req.body || {};
+      const ids = carrito_ids || producto_ids || [];
+      const resultado = await iaService.recomendarProductos(ids);
       res.status(200).json(resultado);
     } catch (error) {
       res.status(error.statusCode || 500).json({
+        ok: false,
+        data: null,
         error: error.message
       });
     }

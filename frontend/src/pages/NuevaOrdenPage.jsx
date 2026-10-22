@@ -6,7 +6,8 @@ import {
   getClientes, 
   createOrden, 
   validarCupon,
-  createCliente 
+  createCliente,
+  recomendarCarritoIA 
 } from '../services/api.js';
 import AlertBox from '../components/AlertBox.jsx';
 import Modal from '../components/Modal.jsx';
@@ -23,7 +24,8 @@ import {
   CheckCircle2, 
   AlertCircle,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Bot
 } from 'lucide-react';
 
 export default function NuevaOrdenPage() {
@@ -37,6 +39,12 @@ export default function NuevaOrdenPage() {
   const [codigoCupon, setCodigoCupon] = useState('');
   const [cuponAplicado, setCuponAplicado] = useState(null); // { codigo, porcentaje, descuento_estimado }
   const [validandoCupon, setValidandoCupon] = useState(false);
+
+  // Recomendaciones de IA mediante n8n
+  const [recomendaciones, setRecomendaciones] = useState([]);
+  const [cargandoRecom, setCargandoRecom] = useState(false);
+  const [errorRecom, setErrorRecom] = useState(null);
+  const [recomSolicitadas, setRecomSolicitadas] = useState(false);
 
   // Estados de retroalimentación
   const [errorMsg, setErrorMsg] = useState(null);
@@ -127,6 +135,43 @@ export default function NuevaOrdenPage() {
   const handleQuitarCupon = () => {
     setCuponAplicado(null);
     setCodigoCupon('');
+  };
+
+  // Solicitar recomendaciones justificadas al webhook de n8n para los productos del carrito
+  const handleSolicitarRecomendaciones = async () => {
+    if (itemsCarrito.length === 0) {
+      setErrorMsg('Añade al menos un producto al carrito para generar recomendaciones inteligentes.');
+      return;
+    }
+    setCargandoRecom(true);
+    setErrorRecom(null);
+    setRecomSolicitadas(true);
+    try {
+      const ids = itemsCarrito.map(i => i.producto.id);
+      const resp = await recomendarCarritoIA(ids);
+      if (resp?.ok && Array.isArray(resp?.data?.recomendaciones)) {
+        setRecomendaciones(resp.data.recomendaciones);
+      } else {
+        // Error devuelto transparentemente por el webhook de n8n o backend
+        setErrorRecom(resp?.error || 'No se pudieron obtener recomendaciones de n8n.');
+      }
+    } catch (err) {
+      setErrorRecom(`Error al contactar webhook de n8n: ${err.message}`);
+    } finally {
+      setCargandoRecom(false);
+    }
+  };
+
+  // Añadir ítem recomendado directamente a la orden
+  const handleAgregarRecomendado = (rec) => {
+    const prodExistente = productos.find(p => p.id === rec.id) || {
+      id: rec.id,
+      nombre: rec.nombre,
+      precio: rec.precio,
+      stock: 10,
+      categoria: rec.categoria
+    };
+    handleAgregarProducto(prodExistente);
   };
 
   // Cálculos financieros en vivo
@@ -416,6 +461,74 @@ export default function NuevaOrdenPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Recomendador Inteligente con n8n */}
+            {itemsCarrito.length > 0 && (
+              <div style={{
+                borderTop: '1px solid var(--border-color)',
+                paddingTop: 14,
+                marginBottom: 16
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Sparkles size={16} color="#c084fc" /> Recomendaciones IA (n8n)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSolicitarRecomendaciones}
+                    disabled={cargandoRecom}
+                    className="btn btn-outline-primary btn-sm"
+                    style={{ padding: '3px 8px', fontSize: '0.75rem' }}
+                  >
+                    <Bot size={13} />
+                    {cargandoRecom ? 'Consultando n8n...' : 'Recomendar complementos'}
+                  </button>
+                </div>
+
+                {errorRecom && (
+                  <AlertBox type="error" message={errorRecom} onClose={() => setErrorRecom(null)} />
+                )}
+
+                {recomendaciones.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                    {recomendaciones.map((rec, idx) => (
+                      <div
+                        key={rec.id || idx}
+                        style={{
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                          border: '1px solid rgba(99, 102, 241, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 4
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{rec.nombre}</span>
+                          <span style={{ fontWeight: 700, color: 'var(--success)', fontSize: '0.85rem' }}>
+                            ${Number(rec.precio).toFixed(2)}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.35 }}>
+                          💡 <strong>Motivo:</strong> {rec.motivo || 'Producto complementario compatible.'}
+                        </p>
+                        <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleAgregarRecomendado(rec)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '2px 8px', fontSize: '0.725rem' }}
+                          >
+                            <Plus size={12} /> Añadir al carrito
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

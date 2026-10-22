@@ -199,7 +199,18 @@ async function testSuite() {
     });
     if (res.status !== 200) throw new Error(`Status esperado 200, recibido: ${res.status}`);
     const data = await res.json();
-    if (!data.ok || !data.data || !data.data.descripcion_generada) throw new Error('Contrato inválido en respuesta de IA');
+    if (typeof data.ok !== 'boolean' || data.error === undefined) throw new Error('Contrato inválido en respuesta de IA');
+  });
+
+  await assertCase('POST /api/ia/recomendar responde contrato { ok, data, error }', async () => {
+    const res = await fetch(`${BASE_URL}/ia/recomendar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ carrito_ids: [1, 2] })
+    });
+    if (res.status !== 200) throw new Error(`Status esperado 200, recibido: ${res.status}`);
+    const data = await res.json();
+    if (typeof data.ok !== 'boolean' || data.error === undefined) throw new Error('Contrato inválido en respuesta de IA');
   });
 
   // =========================================================================
