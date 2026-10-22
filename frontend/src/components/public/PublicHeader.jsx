@@ -1,29 +1,36 @@
 import React, { useState } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext.jsx';
 import { 
   Sparkles, 
   ShoppingBag, 
-  Store, 
-  BookOpen, 
+  Search, 
+  User, 
   Menu, 
   X,
+  ShieldCheck,
   Compass
 } from 'lucide-react';
 
 export default function PublicHeader() {
   const { totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
   const location = useLocation();
 
   const navLinks = [
-    { to: '/', label: 'Inicio', icon: Compass, end: true },
-    { to: '/catalogo', label: 'Catálogo de Juguetes', icon: Store },
-    { to: '/#historia', label: 'Nuestra Historia', icon: BookOpen },
+    { to: '/', label: 'Inicio', end: true },
+    { to: '/catalogo', label: 'Catálogo' },
+    { to: '/#historia', label: 'Sobre nosotros' },
+    { to: '/#contacto', label: 'En contacto' },
   ];
 
-  const handleLinkClick = () => {
-    setMobileMenuOpen(false);
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/catalogo?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
   };
 
   return (
@@ -31,20 +38,20 @@ export default function PublicHeader() {
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      backgroundColor: 'rgba(255, 255, 255, 0.94)',
+      backgroundColor: 'rgba(255, 255, 255, 0.96)',
       backdropFilter: 'blur(10px)',
       borderBottom: '1px solid var(--border-color)',
-      boxShadow: '0 2px 14px rgba(47, 38, 54, 0.04)'
+      boxShadow: '0 2px 12px rgba(47, 38, 54, 0.03)'
     }}>
       <div className="container" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: 12,
-        paddingBottom: 12,
+        paddingTop: 10,
+        paddingBottom: 10,
         gap: 16
       }}>
-        {/* Logo Textual con detalles de Nube de Algodón */}
+        {/* Brand / Logo */}
         <Link 
           to="/" 
           style={{ 
@@ -52,27 +59,29 @@ export default function PublicHeader() {
             alignItems: 'center', 
             gap: 10, 
             textDecoration: 'none',
-            color: 'var(--text-main)'
+            color: 'var(--text-main)',
+            flexShrink: 0
           }}
-          onClick={handleLinkClick}
+          onClick={() => setMobileMenuOpen(false)}
         >
           <div style={{
-            width: 42,
-            height: 42,
-            borderRadius: 14,
+            width: 38,
+            height: 38,
+            borderRadius: 12,
             backgroundColor: 'var(--pastel-lavender-light)',
             color: 'var(--pastel-lavender)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(142, 116, 190, 0.2)'
+            boxShadow: '0 3px 10px rgba(142, 116, 190, 0.18)',
+            border: '1px solid var(--pastel-lavender-border)'
           }}>
-            <Sparkles size={22} strokeWidth={2.3} />
+            <Sparkles size={20} strokeWidth={2.3} />
           </div>
           <div>
             <span style={{
               fontFamily: 'var(--font-heading)',
-              fontSize: '1.35rem',
+              fontSize: '1.25rem',
               fontWeight: 800,
               letterSpacing: '-0.02em',
               color: 'var(--text-main)',
@@ -82,99 +91,169 @@ export default function PublicHeader() {
               Mundo Juguete
             </span>
             <span style={{
-              fontSize: '0.72rem',
+              fontSize: '0.68rem',
               fontWeight: 600,
               color: 'var(--text-subtle)',
-              letterSpacing: '0.04em'
+              letterSpacing: '0.02em'
             }}>
-              Fantasía & Recuerdos
+              Juguetes que inspiran sonrisas
             </span>
           </div>
         </Link>
 
-        {/* Navegación Desktop */}
+        {/* Navegación Central tipo Píldoras */}
         <nav style={{
           display: 'none',
           alignItems: 'center',
-          gap: 6,
-          backgroundColor: 'var(--bg-main)',
-          padding: '4px 6px',
+          gap: 4,
+          backgroundColor: '#FAF7F2',
+          padding: '4px',
           borderRadius: 9999,
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border-color)'
         }} className="desktop-nav">
-          {navLinks.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                style={({ isActive }) => ({
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '7px 16px',
+          {navLinks.map((item) => (
+            <NavLink
+              key={item.label}
+              to={item.to}
+              end={item.end}
+              style={({ isActive }) => {
+                const active = item.to === '/' ? location.pathname === '/' : (isActive && location.pathname !== '/');
+                return {
+                  padding: '6px 18px',
                   borderRadius: 9999,
-                  fontSize: '0.86rem',
+                  fontSize: '0.84rem',
                   fontWeight: 700,
                   textDecoration: 'none',
-                  color: isActive ? '#FFFFFF' : 'var(--text-muted)',
-                  backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                  boxShadow: isActive ? '0 2px 8px rgba(142, 116, 190, 0.3)' : 'none',
-                  transition: 'all 0.2s ease'
-                })}
-              >
-                <Icon size={15} strokeWidth={2.2} />
-                {item.label}
-              </NavLink>
-            );
-          })}
+                  color: active ? '#FFFFFF' : 'var(--text-muted)',
+                  backgroundColor: active ? 'var(--pastel-rose)' : 'transparent',
+                  boxShadow: active ? '0 2px 8px rgba(222, 123, 148, 0.3)' : 'none',
+                  transition: 'all 0.18s ease'
+                };
+              }}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
 
-        {/* Acciones de la derecha: Carrito y Menú Móvil */}
+        {/* Sección Derecha: Buscador, Carrito, Botón Área Taller y Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Botón Carrito */}
+          {/* Buscador de píldora */}
+          <form 
+            onSubmit={handleSearchSubmit} 
+            style={{ position: 'relative', display: 'none' }}
+            className="search-form"
+          >
+            <Search 
+              size={15} 
+              style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} 
+            />
+            <input
+              type="text"
+              placeholder="Buscar juguetes mágicos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: 190,
+                height: 36,
+                padding: '0 12px 0 34px',
+                borderRadius: 9999,
+                border: '1px solid var(--border-color)',
+                backgroundColor: '#FAF7F2',
+                fontSize: '0.8rem',
+                color: 'var(--text-main)',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.width = '220px'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.width = '190px'; }}
+            />
+          </form>
+
+          {/* Botón Carrito con Badge */}
           <Link
             to="/carrito"
             aria-label={`Carrito de compras con ${totalItems} artículos`}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '9px 18px',
-              borderRadius: 9999,
-              backgroundColor: totalItems > 0 ? 'var(--pastel-rose)' : 'var(--bg-card)',
-              color: totalItems > 0 ? '#FFFFFF' : 'var(--text-main)',
-              border: totalItems > 0 ? '1px solid var(--pastel-rose)' : '1px solid var(--border-color)',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              boxShadow: totalItems > 0 ? '0 4px 14px rgba(222, 123, 148, 0.3)' : 'var(--shadow-sm)',
-              transition: 'all 0.2s ease',
-              position: 'relative'
-            }}
-          >
-            <ShoppingBag size={18} strokeWidth={2.3} />
-            <span style={{ display: 'none' }} className="cart-text">Carrito</span>
-            <span style={{
-              display: 'inline-flex',
+              width: 38,
+              height: 38,
+              borderRadius: '50%',
+              backgroundColor: '#FAF7F2',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: 20,
-              height: 20,
-              padding: '0 6px',
-              borderRadius: 9999,
-              backgroundColor: totalItems > 0 ? '#FFFFFF' : 'var(--pastel-lavender-light)',
-              color: totalItems > 0 ? 'var(--pastel-rose)' : 'var(--pastel-lavender-text)',
-              fontSize: '0.75rem',
+              color: 'var(--text-main)',
+              textDecoration: 'none',
+              position: 'relative',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFFFFF'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FAF7F2'; }}
+          >
+            <ShoppingBag size={18} strokeWidth={2.2} />
+            <span style={{
+              position: 'absolute',
+              top: -3,
+              right: -3,
+              backgroundColor: 'var(--pastel-rose)',
+              color: '#FFFFFF',
+              fontSize: '0.68rem',
               fontWeight: 800,
-              lineHeight: 1
+              borderRadius: 9999,
+              padding: '1px 5px',
+              minWidth: 17,
+              textAlign: 'center',
+              lineHeight: 1.2,
+              boxShadow: '0 2px 5px rgba(222, 123, 148, 0.4)'
             }}>
               {totalItems}
             </span>
           </Link>
 
-          {/* Toggle Móvil */}
+          {/* Botón Área del Taller / Acceso Personal */}
+          <Link
+            to="/admin"
+            style={{
+              display: 'none',
+              alignItems: 'center',
+              gap: 6,
+              backgroundColor: 'var(--pastel-lavender-light)',
+              color: 'var(--pastel-lavender-text)',
+              border: '1px solid rgba(142, 116, 190, 0.25)',
+              padding: '7px 14px',
+              borderRadius: 9999,
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              transition: 'all 0.2s ease'
+            }}
+            className="workshop-pill"
+          >
+            <Sparkles size={14} strokeWidth={2.4} />
+            <span>Área del taller</span>
+          </Link>
+
+          {/* Avatar del Usuario */}
+          <div
+            title="Perfil de Usuario"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: '50%',
+              backgroundColor: '#4A3D52',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0
+            }}
+          >
+            <User size={18} strokeWidth={2.2} />
+          </div>
+
+          {/* Toggle Menú Móvil */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="mobile-toggle"
@@ -183,8 +262,8 @@ export default function PublicHeader() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 40,
-              height: 40,
+              width: 38,
+              height: 38,
               borderRadius: 12,
               border: '1px solid var(--border-color)',
               backgroundColor: '#FFFFFF',
@@ -207,39 +286,56 @@ export default function PublicHeader() {
           flexDirection: 'column',
           gap: 10
         }} className="mobile-menu">
-          {navLinks.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={handleLinkClick}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  fontSize: '0.92rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  color: isActive ? 'var(--primary)' : 'var(--text-main)',
-                  backgroundColor: isActive ? 'var(--pastel-lavender-light)' : 'transparent'
-                }}
-              >
-                <Icon size={18} strokeWidth={2.2} />
-                {item.label}
-              </NavLink>
-            );
-          })}
+          {navLinks.map((item) => (
+            <NavLink
+              key={item.label}
+              to={item.to}
+              end={item.end}
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                display: 'block',
+                padding: '10px 14px',
+                borderRadius: 12,
+                fontSize: '0.92rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                color: 'var(--text-main)'
+              }}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          <Link
+            to="/admin"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '10px 14px',
+              borderRadius: 12,
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              color: 'var(--pastel-lavender-text)',
+              backgroundColor: 'var(--pastel-lavender-light)'
+            }}
+          >
+            <Sparkles size={16} />
+            <span>Acceso al Área del Taller</span>
+          </Link>
         </div>
       )}
 
       <style>{`
-        @media (min-width: 768px) {
+        @media (min-width: 900px) {
           .desktop-nav {
+            display: flex !important;
+          }
+          .search-form {
+            display: block !important;
+          }
+          .workshop-pill {
             display: flex !important;
           }
           .mobile-toggle {
@@ -247,9 +343,6 @@ export default function PublicHeader() {
           }
           .mobile-menu {
             display: none !important;
-          }
-          .cart-text {
-            display: inline !important;
           }
         }
       `}</style>
