@@ -5,7 +5,8 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { 
   validarCupon, 
   getCostoEnvio, 
-  createOrden 
+  createOrden,
+  recomendarCarritoIA 
 } from '../../services/api.js';
 import CartItem from '../../components/public/CartItem.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
@@ -23,7 +24,9 @@ import {
   Sparkles,
   ShieldCheck,
   RotateCcw,
-  LogIn
+  LogIn,
+  Bot,
+  Plus
 } from 'lucide-react';
 
 const CIUDADES_COSTA_RICA = [
@@ -37,7 +40,7 @@ const CIUDADES_COSTA_RICA = [
 ];
 
 export default function CartPage() {
-  const { cart, totalItems, subtotal, clearCart } = useCart();
+  const { cart, totalItems, subtotal, clearCart, addToCart } = useCart();
   const { user, isAuthenticated, isCustomer, isStaff } = useAuth();
   const navigate = useNavigate();
 
@@ -65,6 +68,43 @@ export default function CartPage() {
   const [creandoOrden, setCreandoOrden] = useState(false);
   const [errorOrden, setErrorOrden] = useState(null);
   const [ordenCreada, setOrdenCreada] = useState(null);
+
+  // Estados del recomendador de IA (n8n)
+  const [recomendaciones, setRecomendaciones] = useState([]);
+  const [cargandoRecom, setCargandoRecom] = useState(false);
+  const [errorRecom, setErrorRecom] = useState(null);
+  const [recomConsultadas, setRecomConsultadas] = useState(false);
+
+  // Solicitar sugerencias de IA basadas en los productos del carrito
+  const handleSolicitarRecomendaciones = async () => {
+    if (cart.length === 0) return;
+    setCargandoRecom(true);
+    setErrorRecom(null);
+    setRecomConsultadas(true);
+    try {
+      const ids = cart.map(item => Number(item.id));
+      const resp = await recomendarCarritoIA(ids);
+      if (resp?.ok && Array.isArray(resp?.data?.recomendaciones)) {
+        setRecomendaciones(resp.data.recomendaciones);
+      } else {
+        setErrorRecom(resp?.error || 'No se pudieron obtener sugerencias de n8n en este momento.');
+      }
+    } catch (err) {
+      setErrorRecom(`Error al consultar agente de IA: ${err.message}`);
+    } finally {
+      setCargandoRecom(false);
+    }
+  };
+
+  const handleAgregarRecomendado = (rec) => {
+    addToCart({
+      id: rec.id,
+      nombre: rec.nombre,
+      precio: rec.precio,
+      stock: rec.stock || 10,
+      categoria: rec.categoria
+    }, 1);
+  };
 
   // Actualizar cálculo de envío cuando cambia la ciudad o el subtotal
   useEffect(() => {
@@ -388,6 +428,110 @@ export default function CartPage() {
             {cart.map(item => (
               <CartItem key={item.id} item={item} />
             ))}
+          </div>
+
+          {/* Recomendaciones Mágicas con IA (n8n) */}
+          <div style={{
+            marginTop: 20,
+            padding: '18px 20px',
+            backgroundColor: '#FFFFFF',
+            borderRadius: 16,
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 4px 14px rgba(142, 116, 190, 0.05)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 10,
+              marginBottom: 12
+            }}>
+              <div>
+                <span style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-heading)',
+                  color: 'var(--text-main)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}>
+                  <Sparkles size={16} color="var(--pastel-lavender)" /> Sugerencias de IA para tu Carrito
+                </span>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  Sugerencias automáticas del agente n8n basadas en los juguetes que tienes en tu orden.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSolicitarRecomendaciones}
+                disabled={cargandoRecom}
+                className="btn btn-secondary btn-sm"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: '0.78rem',
+                  padding: '6px 12px'
+                }}
+              >
+                <Bot size={14} color="var(--primary)" />
+                {cargandoRecom ? 'Consultando n8n...' : 'Pedir recomendaciones a la IA'}
+              </button>
+            </div>
+
+            {errorRecom && (
+              <AlertBox type="error" message={errorRecom} onClose={() => setErrorRecom(null)} />
+            )}
+
+            {recomendaciones.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 12, marginTop: 12 }}>
+                {recomendaciones.map((rec, idx) => (
+                  <div
+                    key={rec.id || idx}
+                    style={{
+                      padding: 12,
+                      borderRadius: 12,
+                      backgroundColor: 'var(--bg-main)',
+                      border: '1px solid var(--border-color)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--pastel-lavender-text)', fontWeight: 700, textTransform: 'uppercase' }}>
+                        {rec.categoria}
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', marginTop: 2 }}>
+                        {rec.nombre}
+                      </div>
+                      {rec.motivo && (
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 8px 0', fontStyle: 'italic' }}>
+                          "{rec.motivo}"
+                        </p>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary)' }}>
+                        ${Number(rec.precio).toFixed(2)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAgregarRecomendado(rec)}
+                        className="btn btn-primary btn-sm"
+                        style={{ padding: '4px 8px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                        title="Agregar al carrito"
+                      >
+                        <Plus size={12} /> Agregar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div style={{ marginTop: 20 }}>
